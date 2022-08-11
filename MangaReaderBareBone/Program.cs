@@ -5,16 +5,13 @@ using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Disable sql in debugging to accept dummy data
-#if RELEASE
+//TODO Disable sql in debugging to accept dummy data
 builder.Services.AddDbContext<MangaReaderBareBoneContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MangaReaderBareBoneContext") ?? throw new InvalidOperationException("Connection string 'MangaReaderBareBoneContext' not found.")));
-#endif
 
 // Add services to the container.
-
+builder.Services.AddCors();
 builder.Services.AddControllersWithViews();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,8 +34,9 @@ app.UseStaticFiles(new StaticFileOptions()
     ))
 #endif
 });
-app.UseRouting();
 
+app.UseRouting();
+app.UseCors(policy=> policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:44477"));
 
 app.MapControllerRoute(
     name: "default",

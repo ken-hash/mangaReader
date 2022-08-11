@@ -99,6 +99,17 @@ namespace MangaReaderBareBone.Controllers
             return NotFound();
         }
 
-
+        [HttpPost]
+        public ActionResult<MangaLog> PostMangaLog(MangaLog log)
+        {
+            if (!ModelState.IsValid) { 
+                return BadRequest(ModelState); 
+            }
+            if (_context.MangaLogs == null)
+                return Problem("Can't connect to database");
+            _context.MangaLogs.Add(log);
+            _context.SaveChangesAsync();
+            return Problem("Disabled Post");
+        }
     }
 }
