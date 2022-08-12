@@ -10,6 +10,7 @@ import { HomeComponent } from './home/home.component';
 import { MangaComponent } from './manga/manga.component';
 import { MangaDetailComponent } from './manga/manga-detail/manga-detail.component';
 import { MangaReadComponent } from './manga/manga-read/manga-read.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { MangaReadComponent } from './manga/manga-read/manga-read.component';
     MangaComponent,
     MangaDetailComponent,
     MangaReadComponent,
+    PageNotFoundComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -28,7 +30,10 @@ import { MangaReadComponent } from './manga/manga-read/manga-read.component';
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'Manga', component: MangaComponent },
       { path: 'Manga/:mangaName', component: MangaDetailComponent },
-      { path: 'Manga/:mangaName/:chapterName', component: MangaReadComponent }
+      { path: 'Manga/:mangaName/:chapterName', component: MangaReadComponent },
+      { path: '404', component: PageNotFoundComponent },
+      { path: '**', redirectTo: '404' }
+
     ])
   ],
   providers: [],

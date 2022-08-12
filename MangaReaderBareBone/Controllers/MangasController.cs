@@ -76,7 +76,7 @@ namespace MangaReaderBareBone.Controllers
 
         //retrieving mangachapters using mangaid and chaptername
         [HttpGet("chapters")]
-        public async Task<ActionResult<List<MangaChapters>>> GetChapters(int? mangaId, string? mangaName, string? chapterName)
+        public async Task<ActionResult<MangaChapters>> GetChapters(int? mangaId, string? mangaName, string? chapterName)
         {
             if (_context.Mangas == null||(!mangaId.HasValue && string.IsNullOrEmpty(mangaName)))
             {
@@ -93,7 +93,7 @@ namespace MangaReaderBareBone.Controllers
                 var mangaChapters = GetMangaChapters(mangaId, chapterName);
                 if (mangaChapters != null)
                 {
-                    return mangaChapters;
+                    return mangaChapters.First();
                 }
                 else
                 {
@@ -110,7 +110,7 @@ namespace MangaReaderBareBone.Controllers
                 var mangaChapters = GetMangaChapters(manga.MangaId, chapterName);
                 if (mangaChapters != null)
                 {
-                    return mangaChapters;
+                    return mangaChapters.First();
                 }
                 else
                 {

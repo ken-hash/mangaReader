@@ -1,1 +1,9 @@
-<p>manga-read works!</p>
+<div class="d-flex justify-content-between"></div>
+<section>
+  <div class="row">
+    <div class="text-center">
+      <!-- image is hosted in home server with path Manga/downloads/manganame/chaptername/-->
+      <img class="img-fluid center-block"  *ngFor='let image of chapterDetails["path"].split(",")' src="http://192.168.50.11/Manga/downloads/{{manga}}/{{chapterName}}/{{image}}" alt="{{image}}"/>
+    </div>
+  </div>
+</section>
