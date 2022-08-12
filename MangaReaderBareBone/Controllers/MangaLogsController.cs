@@ -74,13 +74,13 @@ namespace MangaReaderBareBone.Controllers
 
         //Retrieving all logs for manga using manga name with sort as second parameter
         [HttpGet("mangaName")]
-        public async Task<ActionResult<List<MangaLog>>> GetMangaLogByMangaID(string? name, string?sort="asc")
+        public async Task<ActionResult<List<MangaLog>>> GetMangaLogByMangaID(string? mangaName, string?sort="asc")
         {
-            if (_context.MangaLogs == null||string.IsNullOrEmpty(name) || _context.MangaChapters == null)
+            if (_context.MangaLogs == null||string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null)
             {
                 return NotFound();
             }
-            var manga = await _context.Mangas.FirstOrDefaultAsync(manga => manga.Name.ToLower() == name.ToLower());
+            var manga = await _context.Mangas.FirstOrDefaultAsync(manga => manga.Name.ToLower() == mangaName.ToLower());
             if (manga != null)
             {
                 var mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId);

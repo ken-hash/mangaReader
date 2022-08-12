@@ -1,1 +1,28 @@
-<p>{{manga}}</p>
+<h2>{{manga}}</h2>
+
+<div class="d-flex justify-content-between"></div>
+<section>
+  <table class="table table-bordered " style="width:100%">
+    <thead>
+      <tr>
+        <th>
+          ChapterName
+        </th>
+        <th>
+          LastUpdated
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let chapter of allChapters">
+        <td>
+          <a [routerLink]="['/Manga/',manga, chapter.mangaChapters.mangaChapter]">{{chapter.mangaChapters.mangaChapter}} </a>
+        </td>
+        <td>
+          {{chapter.dateTime}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+

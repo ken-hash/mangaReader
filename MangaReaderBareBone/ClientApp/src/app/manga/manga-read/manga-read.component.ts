@@ -11,6 +11,7 @@ export class MangaReadComponent implements OnInit {
   manga: any;
   chapterName: any;
   chapterDetails: any;
+  allChapters: any;
   constructor(private activatedRoute: ActivatedRoute,
     private http: HttpClient  ) { }
 
@@ -21,11 +22,20 @@ export class MangaReadComponent implements OnInit {
     });
     let params = new HttpParams();
     params = params.append("mangaName", this.manga);
+    this.http.get('https://localhost:7235/api/Mangas/chapters', { params: params }).subscribe(response => {
+      this.allChapters = response;
+    }, error => {
+      console.log(error);
+    })
+    params = new HttpParams();
+    params = params.append("mangaName", this.manga);
     params = params.append("chapterName", this.chapterName);
     this.http.get('https://localhost:7235/api/Mangas/chapters', { params: params }).subscribe(response => {
-        this.chapterDetails = response;
+      this.chapterDetails = response;
       }, error => {
         console.log(error);
     })
+
   }
+
 }
