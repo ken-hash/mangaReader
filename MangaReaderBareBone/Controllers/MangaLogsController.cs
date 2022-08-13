@@ -103,10 +103,14 @@ namespace MangaReaderBareBone.Controllers
             {
                 return Problem("Can't connect to database");
             }
-
-            _context.MangaLogs.Add(log);
-            _context.SaveChangesAsync();
             return Problem("Disabled Post");
+
+            /*
+            _context.MangaLogs.Add(log);
+            _context.SaveChangesAsync();*/
+
         }
+
+
     }
 }

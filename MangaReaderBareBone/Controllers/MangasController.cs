@@ -2,6 +2,8 @@
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Entity.Core.Objects;
+using System.Text.RegularExpressions;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -169,5 +171,39 @@ namespace MangaReaderBareBone.Controllers
             return Problem("Disabled Deletion");
         }
 
+        [HttpGet("Search")]
+        public async Task<ActionResult<List<Manga>>> SearchManga(int? id, string? name)
+        {
+            if (_context.Mangas == null || (!id.HasValue && string.IsNullOrEmpty(name)))
+            {
+                return NotFound();
+            }
+            List<Manga> searchResults = new List<Manga>();
+            if (id.HasValue)
+            {
+                Manga? manga = await _context.Mangas.FindAsync(id);
+                if (manga == null)
+                {
+                    return NotFound();
+                }
+                manga.Chapters = GetMangaChapters(manga!.MangaId) ?? new List<MangaChapters>();
+                searchResults.Add(manga);
+                return searchResults;
+            }
+            else if (!string.IsNullOrEmpty(name))
+            {
+                searchResults = _context.Mangas.Where(e=> e.Name.ToLower().Contains(name.ToLower())).ToList();
+                if (searchResults == null)
+                {
+                    return NotFound();
+                }
+                searchResults.ForEach(e=> GetMangaChapters(e.MangaId));
+                return searchResults;
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
     }
 }
