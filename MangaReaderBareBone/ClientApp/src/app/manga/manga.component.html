@@ -1,1 +1,28 @@
-<p>manga List!</p>
+<h2>All Manga List</h2>
+
+<div class="d-flex justify-content-between"></div>
+<section>
+  <table class="table table-bordered " style="width:100%">
+    <thead>
+      <tr>
+        <th>
+          Manga Name
+        </th>
+        <th>
+          Latest Chapter
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let manga of allManga">
+        <td>
+          <a [routerLink]="['/Manga/',manga.name]">{{manga.name}} </a>
+        </td>
+          <td *ngFor ="let chapter of manga.chapters">
+            <a [routerLink]="['/Manga/',manga.name, chapter.mangaChapter]">{{chapter.mangaChapter}} </a>
+          </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+

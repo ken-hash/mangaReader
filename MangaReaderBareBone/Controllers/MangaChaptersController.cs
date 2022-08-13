@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MangaReaderBareBone.Data;
+﻿using MangaReaderBareBone.Data;
 using MangaReaderBareBone.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -31,7 +25,7 @@ namespace MangaReaderBareBone.Controllers
             {
                 return NotFound();
             }
-            var mangaChapters = await _context.MangaChapters.FindAsync(id);
+            MangaChapters? mangaChapters = await _context.MangaChapters.FindAsync(id);
 
             if (mangaChapters == null)
             {

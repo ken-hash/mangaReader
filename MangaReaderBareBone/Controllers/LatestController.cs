@@ -28,7 +28,7 @@ namespace MangaReaderBareBone.Controllers
             List<Manga> latestManga = new List<Manga>();
             var addedMangaInDays = _context.Mangas?.Join(_context.MangaLogs, manga => manga.MangaId, logs => logs.MangaId, (manga, logs) => new
             { Mangas = manga, MangaLogs = logs }
-            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Added" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(Double)numDays));
+            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Added" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays));
             if (addedMangaInDays == null)
             {
                 return NotFound();
@@ -44,10 +44,16 @@ namespace MangaReaderBareBone.Controllers
                     latestManga.Add(manga.Mangas);
                 }
                 if (latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters?.Count >= 10)
+                {
                     continue;
-                var chapterToAdd = await _context.MangaChapters.FindAsync(manga.MangaLogs.MangaChaptersId);
+                }
+
+                MangaChapters? chapterToAdd = await _context.MangaChapters.FindAsync(manga.MangaLogs.MangaChaptersId);
                 if (chapterToAdd == null)
+                {
                     continue;
+                }
+
                 latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters.Add(chapterToAdd);
             }
             return latestManga;
@@ -65,7 +71,7 @@ namespace MangaReaderBareBone.Controllers
             List<Manga> latestManga = new List<Manga>();
             var addedMangaInDays = _context.Mangas?.Join(_context.MangaLogs, manga => manga.MangaId, logs => logs.MangaId, (manga, logs) => new
             { Mangas = manga, MangaLogs = logs }
-            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Read" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(Double)numDays));
+            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Read" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays));
             if (addedMangaInDays == null)
             {
                 return NotFound();
@@ -81,10 +87,16 @@ namespace MangaReaderBareBone.Controllers
                     latestManga.Add(manga.Mangas);
                 }
                 if (latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters?.Count >= 10)
+                {
                     continue;
-                var chapterToAdd = await _context.MangaChapters.FindAsync(manga.MangaLogs.MangaChaptersId);
+                }
+
+                MangaChapters? chapterToAdd = await _context.MangaChapters.FindAsync(manga.MangaLogs.MangaChaptersId);
                 if (chapterToAdd == null)
+                {
                     continue;
+                }
+
                 latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters.Add(chapterToAdd);
             }
             return latestManga;

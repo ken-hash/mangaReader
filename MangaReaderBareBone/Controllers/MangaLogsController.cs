@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using MangaReaderBareBone.Data;
+using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MangaReaderBareBone.Data;
-using MangaReaderBareBone.Models;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -29,11 +24,11 @@ namespace MangaReaderBareBone.Controllers
         [HttpGet("logId")]
         public async Task<ActionResult<MangaLog>> GetMangaLogByID(int id)
         {
-          if (_context.MangaLogs == null)
-          {
-              return NotFound();
-          }
-            var mangaLog = await _context.MangaLogs.FindAsync(id);
+            if (_context.MangaLogs == null)
+            {
+                return NotFound();
+            }
+            MangaLog? mangaLog = await _context.MangaLogs.FindAsync(id);
 
             if (mangaLog == null)
             {
@@ -52,16 +47,15 @@ namespace MangaReaderBareBone.Controllers
             {
                 return NotFound();
             }
-            var manga = await _context.Mangas.FindAsync(id);
+            Manga? manga = await _context.Mangas.FindAsync(id);
             if (manga != null)
             {
-                var mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId);
+                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId);
                 if (mangaLog == null)
                 {
                     return NotFound();
                 }
-                //coallesce to show empty chapters.. shouldnt happen as it is a foreign key and would be never be empty
-                mangaLog.ToList().ForEach(e => e.MangaChapters = _context.MangaChapters.Find(e.MangaChaptersId) ?? new MangaChapters());
+                mangaLog.ToList().ForEach(e => e.MangaChapters = _context.MangaChapters.First(f => f.MangaChaptersId == e.MangaChaptersId));
                 if (sort?.ToLower() == "desc")
                 {
                     return mangaLog.ToList().OrderBy(e => e.DateTime).Reverse().ToList();
@@ -74,25 +68,24 @@ namespace MangaReaderBareBone.Controllers
 
         //Retrieving all logs for manga using manga name with sort as second parameter
         [HttpGet("mangaName")]
-        public async Task<ActionResult<List<MangaLog>>> GetMangaLogByMangaID(string? mangaName, string?sort="asc")
+        public async Task<ActionResult<List<MangaLog>>> GetMangaLogByMangaID(string? mangaName, string? sort = "asc")
         {
-            if (_context.MangaLogs == null||string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null)
+            if (_context.MangaLogs == null || string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null)
             {
                 return NotFound();
             }
-            var manga = await _context.Mangas.FirstOrDefaultAsync(manga => manga.Name.ToLower() == mangaName.ToLower());
+            Manga? manga = await _context.Mangas.FirstOrDefaultAsync(manga => manga.Name.ToLower() == mangaName.ToLower());
             if (manga != null)
             {
-                var mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId);
+                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId);
                 if (mangaLog == null)
                 {
                     return NotFound();
                 }
-                //coallesce to show empty chapters.. shouldnt happen as it is a foreign key and would be never be empty
-                mangaLog.ToList().ForEach(e => e.MangaChapters = _context.MangaChapters.Find(e.MangaChaptersId)??new MangaChapters());
+                mangaLog.ToList().ForEach(e => e.MangaChapters = _context.MangaChapters.First(f => f.MangaChaptersId == e.MangaChaptersId));
                 if (sort?.ToLower() == "desc")
                 {
-                    return mangaLog.ToList().OrderBy(e=>e.DateTime).Reverse().ToList();
+                    return mangaLog.ToList().OrderBy(e => e.DateTime).Reverse().ToList();
                 }
                 return mangaLog.ToList();
             }
@@ -102,11 +95,15 @@ namespace MangaReaderBareBone.Controllers
         [HttpPost]
         public ActionResult<MangaLog> PostMangaLog(MangaLog log)
         {
-            if (!ModelState.IsValid) { 
-                return BadRequest(ModelState); 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
             if (_context.MangaLogs == null)
+            {
                 return Problem("Can't connect to database");
+            }
+
             _context.MangaLogs.Add(log);
             _context.SaveChangesAsync();
             return Problem("Disabled Post");

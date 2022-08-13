@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using MangaReaderBareBone.Data;
+using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MangaReaderBareBone.Data;
-using MangaReaderBareBone.Models;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -34,7 +29,7 @@ namespace MangaReaderBareBone.Controllers
             }
             if (id.HasValue)
             {
-                var manga = await _context.Mangas.FindAsync(id);
+                Manga? manga = await _context.Mangas.FindAsync(id);
                 if (manga == null)
                 {
                     return NotFound();
@@ -44,12 +39,12 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(name))
             {
-                var manga = _context.Mangas.FirstOrDefault(e => e.Name == name);
+                Manga? manga = _context.Mangas.FirstOrDefault(e => e.Name == name);
                 if (manga == null)
                 {
                     return NotFound();
                 }
-                manga.Chapters = GetMangaChapters(manga!.MangaId)??new List<MangaChapters>();
+                manga.Chapters = GetMangaChapters(manga!.MangaId) ?? new List<MangaChapters>();
                 return manga;
 
             }
@@ -59,17 +54,49 @@ namespace MangaReaderBareBone.Controllers
             }
         }
 
+        //retrieve mangalist with last added chapter with parameter max number of manga to retrieve
+        [HttpGet("mangaList")]
+        public ActionResult<List<Manga>> GetMangaList(int? max)
+        {
+            if (_context.Mangas == null)
+            {
+                return NotFound();
+            }
+            if (max.HasValue)
+            {
+                IQueryable<Manga> mangaList = _context.Mangas.Take(max ?? 1);
+                mangaList.ToList().ForEach(manga => GetMangaChapters(manga.MangaId, maxChapters: 1));
+                return mangaList.Where(manga => manga.Chapters.Count > 0).ToList();
+            }
+            else
+            {
+                DbSet<Manga> mangaList = _context.Mangas;
+                mangaList.ToList().ForEach(manga => GetMangaChapters(manga.MangaId, maxChapters: 1));
+                return mangaList.Where(manga => manga.Chapters.Count > 0).ToList();
+            }
+        }
+
         //retrieve manga chapter details using mangaid
         //will list all chapters if no chaptername is provided
-        private List<MangaChapters>? GetMangaChapters(int? mangaId, string? chapterName=null)
+        private List<MangaChapters>? GetMangaChapters(int? mangaId, string? chapterName = null, int? maxChapters = 1)
         {
             if (string.IsNullOrEmpty(chapterName))
             {
+                if (maxChapters.HasValue)
+                {
+                    MangaChapters? latestChapter = _context.MangaChapters?.OrderBy(o => o.MangaChaptersId).LastOrDefault(e => e.MangaId == mangaId);
+                    List<MangaChapters> latestChapterList = new List<MangaChapters>();
+                    if (latestChapter != null)
+                    {
+                        latestChapterList.Add(latestChapter);
+                    }
+                    return latestChapterList;
+                }
                 return _context.MangaChapters?.Where(e => e.MangaId == mangaId).ToList();
             }
             else
             {
-                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter == chapterName).ToList();
+                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter == chapterName).Take(maxChapters ?? 1).ToList();
             }
         }
 
@@ -78,19 +105,19 @@ namespace MangaReaderBareBone.Controllers
         [HttpGet("chapters")]
         public async Task<ActionResult<List<MangaChapters>>> GetChapters(int? mangaId, string? mangaName, string? chapterName)
         {
-            if (_context.Mangas == null||(!mangaId.HasValue && string.IsNullOrEmpty(mangaName)))
+            if (_context.Mangas == null || (!mangaId.HasValue && string.IsNullOrEmpty(mangaName)))
             {
                 return NotFound();
             }
 
             if (mangaId.HasValue)
             {
-                var manga = await _context.Mangas.FindAsync(mangaId);
+                Manga? manga = await _context.Mangas.FindAsync(mangaId);
                 if (manga == null)
                 {
                     return NotFound();
                 }
-                var mangaChapters = GetMangaChapters(mangaId, chapterName);
+                List<MangaChapters>? mangaChapters = GetMangaChapters(mangaId, chapterName);
                 if (mangaChapters != null)
                 {
                     return mangaChapters;
@@ -102,12 +129,12 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(mangaName))
             {
-                var manga = await _context.Mangas.FirstOrDefaultAsync(e=>e.Name == mangaName);
+                Manga? manga = await _context.Mangas.FirstOrDefaultAsync(e => e.Name == mangaName);
                 if (manga == null)
                 {
                     return NotFound();
                 }
-                var mangaChapters = GetMangaChapters(manga.MangaId, chapterName);
+                List<MangaChapters>? mangaChapters = GetMangaChapters(manga.MangaId, chapterName);
                 if (mangaChapters != null)
                 {
                     return mangaChapters;
@@ -133,7 +160,7 @@ namespace MangaReaderBareBone.Controllers
         [HttpPost]
         public ActionResult<Manga> PostManga(Manga manga)
         {
-          return Problem("Disabled Post");
+            return Problem("Disabled Post");
         }
 
         [HttpDelete("{id}")]

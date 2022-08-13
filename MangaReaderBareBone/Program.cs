@@ -1,6 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using MangaReaderBareBone.Data;
+﻿using MangaReaderBareBone.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +35,7 @@ app.UseStaticFiles(new StaticFileOptions()
 });
 
 app.UseRouting();
-app.UseCors(policy=> policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:44477"));
+app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:44477"));
 
 app.MapControllerRoute(
     name: "default",
