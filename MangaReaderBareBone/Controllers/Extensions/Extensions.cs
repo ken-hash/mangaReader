@@ -26,19 +26,16 @@ namespace MangaReaderBareBone.Controllers.Extensions
             return mangaDTO;
         }
 
-        public static MangaChapterDTO toDTO(this MangaChapters chapter,IEnumerable<MangaChapters> fullChapterList)
+        public static MangaChapterDTO toDTO(this MangaChapters chapter, IEnumerable<MangaChapters> fullChapterList)
         {
             MangaChapterDTO mangaChapterDTO = new MangaChapterDTO
             {
-                ChapterName = chapter.MangaChapter,
-                ImageList = chapter.Path,
-                
-                
+                MangaChapter = chapter.MangaChapter,
+                Path = chapter.Path,
             };
             int chapterIndex = fullChapterList.ToList().FindIndex(e => e.MangaChaptersId == chapter.MangaChaptersId);
-            if (chapterIndex == fullChapterList.Count()-1)
+            if (chapterIndex == fullChapterList.Count() - 1)
             {
-                mangaChapterDTO.NextChapter = fullChapterList.ToList()[chapterIndex + 1].MangaChapter;
                 mangaChapterDTO.PreviousChapter = fullChapterList.ToList()[chapterIndex - 1].MangaChapter;
             }
             else if (chapterIndex == 0)
@@ -53,11 +50,21 @@ namespace MangaReaderBareBone.Controllers.Extensions
             return mangaChapterDTO;
         }
 
+        public static List<MangaChapterDTO> toDTOList(this List<MangaChapters> chapterList, IEnumerable<MangaChapters> fullChapterList)
+        {
+            List<MangaChapterDTO> mangaChapterDTOList = new List<MangaChapterDTO>();
+            foreach (MangaChapters chapter in chapterList)
+            {
+                mangaChapterDTOList.Add(chapter.toDTO(fullChapterList));
+            }
+            return mangaChapterDTOList;
+        }
+
 
         public static List<string?> toChapterList(this IEnumerable<MangaChapters> chapterList)
         {
             List<string?> result = new List<string?>();
-            foreach(MangaChapters chapter in chapterList)
+            foreach (MangaChapters chapter in chapterList)
             {
                 result.Add(chapter.MangaChapter);
             }

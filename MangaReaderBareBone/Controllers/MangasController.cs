@@ -4,9 +4,6 @@ using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Data.Entity.Core.Objects;
-using System.Text.RegularExpressions;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -45,7 +42,7 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(name))
             {
-                manga = _context.Mangas.FirstOrDefault(e => e.Name == name);
+                manga = _context.Mangas.FirstOrDefault(e => e.Name.ToLower() == name.ToLower());
                 if (manga == null)
                 {
                     return NotFound();
@@ -59,7 +56,7 @@ namespace MangaReaderBareBone.Controllers
         [HttpGet("mangaList")]
         public ActionResult<List<Manga>> GetMangaList(int? max)
         {
-            if (_context.Mangas == null||!max.HasValue||max<=0)
+            if (_context.Mangas == null || !max.HasValue || max <= 0)
             {
                 return NotFound();
             }
@@ -92,7 +89,7 @@ namespace MangaReaderBareBone.Controllers
             }
             else
             {
-                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter == chapterName).Take(maxChapters ?? 1).ToList();
+                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter.ToLower() == chapterName.ToLower()).Take(maxChapters ?? 1).ToList();
             }
         }
 
@@ -109,46 +106,30 @@ namespace MangaReaderBareBone.Controllers
 
         //retrieving mangachapters using mangaid and chaptername
         [HttpGet("chapters")]
-        public async Task<ActionResult<List<MangaChapters>>> GetChapters(int? mangaId, string? mangaName, string? chapterName)
+        public async Task<ActionResult<List<MangaChapterDTO>>> GetChapters(int? mangaId, string? mangaName, string? chapterName)
         {
             if (_context.Mangas == null || (!mangaId.HasValue && string.IsNullOrEmpty(mangaName)))
             {
                 return NotFound();
             }
-
+            Manga? manga = null;
             if (mangaId.HasValue)
             {
-                Manga? manga = await _context.Mangas.FindAsync(mangaId);
-                if (manga == null)
-                {
-                    return NotFound();
-                }
-                List<MangaChapters>? mangaChapters = GetMangaChapters(mangaId, chapterName);
-                if (mangaChapters != null)
-                {
-                    return mangaChapters;
-                }
-                else
-                {
-                    return NotFound();
-                }
+                manga = await _context.Mangas.FindAsync(mangaId);
             }
             else if (!string.IsNullOrEmpty(mangaName))
             {
-                Manga? manga = await _context.Mangas.FirstOrDefaultAsync(e => e.Name == mangaName);
-                if (manga == null)
-                {
-                    return NotFound();
-                }
-                List<MangaChapters>? mangaChapters = GetMangaChapters(manga.MangaId, chapterName);
-                if (mangaChapters != null)
-                {
-                    return mangaChapters;
-                }
-                else
-                {
-                    return NotFound();
-                }
+                manga = await _context.Mangas.FirstOrDefaultAsync(e => e.Name.ToLower() == mangaName.ToLower());
+            }
+            if (manga == null)
+            {
+                return NotFound();
+            }
+            List<MangaChapters>? mangaChapters = GetMangaChapters(manga.MangaId, chapterName);
+            List<MangaChapters>? fullChapterList = _context.MangaChapters?.Where(e => e.MangaId == manga.MangaId).ToList();
+            if (mangaChapters != null && fullChapterList != null)
+            {
+                return mangaChapters.toDTOList(fullChapterList);
             }
             else
             {
@@ -197,12 +178,12 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(name))
             {
-                List<Manga> searchResults = _context.Mangas.Where(e=> e.Name.ToLower().Contains(name.ToLower())).ToList();
+                List<Manga> searchResults = _context.Mangas.Where(e => e.Name.ToLower().Contains(name.ToLower())).ToList();
                 if (searchResults == null)
                 {
                     return NotFound();
                 }
-                foreach(Manga manga in searchResults)
+                foreach (Manga manga in searchResults)
                 {
                     MangaChapters? lastRead = getLastReadChapter(manga);
                     searchResultsDTO.Add(manga.toDTO(lastRead));

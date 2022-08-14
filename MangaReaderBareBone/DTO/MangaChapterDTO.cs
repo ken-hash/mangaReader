@@ -2,8 +2,8 @@
 {
     public class MangaChapterDTO
     {
-        public string? ChapterName { get; set; }
-        public string? ImageList { get; set; }
+        public string? MangaChapter { get; set; }
+        public string? Path { get; set; }
         public string? PreviousChapter { get; set; }
         public string? NextChapter { get; set; }
     }
