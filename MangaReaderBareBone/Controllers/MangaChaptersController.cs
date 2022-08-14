@@ -1,4 +1,6 @@
-﻿using MangaReaderBareBone.Data;
+﻿using MangaReaderBareBone.Controllers.Extensions;
+using MangaReaderBareBone.Data;
+using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,20 +21,20 @@ namespace MangaReaderBareBone.Controllers
         }
 
         [HttpGet("chapterId")]
-        public async Task<ActionResult<MangaChapters>> GetMangaChapters(int id)
+        public async Task<ActionResult<MangaChapterDTO>> GetMangaChapters(int id)
         {
             if (_context.MangaChapters == null)
             {
                 return NotFound();
             }
-            MangaChapters? mangaChapters = await _context.MangaChapters.FindAsync(id);
+            MangaChapters? mangaChapter = await _context.MangaChapters.FindAsync(id);
 
-            if (mangaChapters == null)
+            if (mangaChapter == null)
             {
                 return NotFound();
             }
-
-            return mangaChapters;
+            List<MangaChapters> fullChapterList = _context.MangaChapters.Where(e => e.MangaId == mangaChapter.MangaId).ToList();
+            return mangaChapter.toDTO(fullChapterList);
         }
     }
 }

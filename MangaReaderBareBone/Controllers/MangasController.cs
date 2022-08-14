@@ -1,7 +1,10 @@
-﻿using MangaReaderBareBone.Data;
+﻿using MangaReaderBareBone.Controllers.Extensions;
+using MangaReaderBareBone.Data;
+using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Data.Entity.Core.Objects;
 using System.Text.RegularExpressions;
 
@@ -23,65 +26,56 @@ namespace MangaReaderBareBone.Controllers
 
         //retrieving manga details in the database using manga id or manga name
         [HttpGet("mangas")]
-        public async Task<ActionResult<Manga>> GetManga(int? id, string? name)
+        public async Task<ActionResult<MangasDTO>> GetManga(int? id, string? name)
         {
             if (_context.Mangas == null || (!id.HasValue && string.IsNullOrEmpty(name)))
             {
                 return NotFound();
             }
+            Manga? manga = null;
             if (id.HasValue)
             {
-                Manga? manga = await _context.Mangas.FindAsync(id);
+                manga = await _context.Mangas.FindAsync(id);
                 if (manga == null)
                 {
                     return NotFound();
                 }
-                manga.Chapters = GetMangaChapters(manga!.MangaId) ?? new List<MangaChapters>();
-                return manga;
+                manga.Chapters = GetMangaChapters(manga!.MangaId)!;
+
             }
             else if (!string.IsNullOrEmpty(name))
             {
-                Manga? manga = _context.Mangas.FirstOrDefault(e => e.Name == name);
+                manga = _context.Mangas.FirstOrDefault(e => e.Name == name);
                 if (manga == null)
                 {
                     return NotFound();
                 }
-                manga.Chapters = GetMangaChapters(manga!.MangaId) ?? new List<MangaChapters>();
-                return manga;
-
             }
-            else
-            {
-                return NotFound();
-            }
+            MangaChapters? lastReadChapter = getLastReadChapter(manga!);
+            return manga!.toDTO(lastReadChapter);
         }
 
         //retrieve mangalist with last added chapter with parameter max number of manga to retrieve
         [HttpGet("mangaList")]
         public ActionResult<List<Manga>> GetMangaList(int? max)
         {
-            if (_context.Mangas == null)
+            if (_context.Mangas == null||!max.HasValue||max<=0)
             {
                 return NotFound();
             }
-            if (max.HasValue)
-            {
-                IQueryable<Manga> mangaList = _context.Mangas.Take(max ?? 1);
-                mangaList.ToList().ForEach(manga => GetMangaChapters(manga.MangaId, maxChapters: 1));
-                return mangaList.Where(manga => manga.Chapters.Count > 0).ToList();
-            }
-            else
-            {
-                DbSet<Manga> mangaList = _context.Mangas;
-                mangaList.ToList().ForEach(manga => GetMangaChapters(manga.MangaId, maxChapters: 1));
-                return mangaList.Where(manga => manga.Chapters.Count > 0).ToList();
-            }
+            IQueryable<Manga> mangaList = _context.Mangas.Take(max ?? 1);
+            mangaList.ToList().ForEach(manga => GetMangaChapters(manga.MangaId, maxChapters: 1));
+            return mangaList.Where(manga => manga.Chapters.Count > 0).ToList();
         }
 
         //retrieve manga chapter details using mangaid
         //will list all chapters if no chaptername is provided
         private List<MangaChapters>? GetMangaChapters(int? mangaId, string? chapterName = null, int? maxChapters = 1)
         {
+            if (maxChapters <= 0)
+            {
+                return new List<MangaChapters>();
+            }
             if (string.IsNullOrEmpty(chapterName))
             {
                 if (maxChapters.HasValue)
@@ -102,6 +96,16 @@ namespace MangaReaderBareBone.Controllers
             }
         }
 
+        private MangaChapters? getLastReadChapter(Manga manga)
+        {
+            MangaLog? lastReadLog = _context.MangaLogs?.Where(e => e.MangaId == manga!.MangaId && e.Status == "Read").OrderBy(e => e.DateTime).LastOrDefault();
+            MangaChapters? lastReadChapter = null;
+            if (lastReadLog != null)
+            {
+                lastReadChapter = _context.MangaChapters?.FirstOrDefault(e => e.MangaChaptersId == lastReadLog.MangaChaptersId);
+            }
+            return lastReadChapter;
+        }
 
         //retrieving mangachapters using mangaid and chaptername
         [HttpGet("chapters")]
@@ -172,13 +176,13 @@ namespace MangaReaderBareBone.Controllers
         }
 
         [HttpGet("Search")]
-        public async Task<ActionResult<List<Manga>>> SearchManga(int? id, string? name)
+        public async Task<ActionResult<List<MangasDTO>>> SearchManga(int? id, string? name)
         {
             if (_context.Mangas == null || (!id.HasValue && string.IsNullOrEmpty(name)))
             {
                 return NotFound();
             }
-            List<Manga> searchResults = new List<Manga>();
+            List<MangasDTO> searchResultsDTO = new List<MangasDTO>();
             if (id.HasValue)
             {
                 Manga? manga = await _context.Mangas.FindAsync(id);
@@ -187,18 +191,23 @@ namespace MangaReaderBareBone.Controllers
                     return NotFound();
                 }
                 manga.Chapters = GetMangaChapters(manga!.MangaId) ?? new List<MangaChapters>();
-                searchResults.Add(manga);
-                return searchResults;
+                MangaChapters? lastRead = getLastReadChapter(manga);
+                searchResultsDTO.Add(manga.toDTO(lastRead));
+                return searchResultsDTO;
             }
             else if (!string.IsNullOrEmpty(name))
             {
-                searchResults = _context.Mangas.Where(e=> e.Name.ToLower().Contains(name.ToLower())).ToList();
+                List<Manga> searchResults = _context.Mangas.Where(e=> e.Name.ToLower().Contains(name.ToLower())).ToList();
                 if (searchResults == null)
                 {
                     return NotFound();
                 }
-                searchResults.ForEach(e=> GetMangaChapters(e.MangaId));
-                return searchResults;
+                foreach(Manga manga in searchResults)
+                {
+                    MangaChapters? lastRead = getLastReadChapter(manga);
+                    searchResultsDTO.Add(manga.toDTO(lastRead));
+                }
+                return searchResultsDTO;
             }
             else
             {

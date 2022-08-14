@@ -2,6 +2,8 @@
 {
     public class MangasDTO
     {
-        //left empty for now
+        public string? MangaName { get; set; }
+        public List<string?>? ChaptersAdded { get; set; }
+        public string? LastChapterRead { get; set; }
     }
 }
