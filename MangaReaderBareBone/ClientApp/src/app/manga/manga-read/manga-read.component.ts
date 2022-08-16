@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { ChapterService } from '../../services/chapter.service';
 
 @Component({
   selector: 'app-manga-read',
@@ -13,29 +13,15 @@ export class MangaReadComponent implements OnInit {
   chapterDetails: any;
   allChapters: any;
   constructor(private activatedRoute: ActivatedRoute,
-    private http: HttpClient  ) { }
+    private chapterService: ChapterService) { }
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => {
       this.manga = params['mangaName'];
       this.chapterName = params['chapterName'];
+      this.chapterService.getChapter(this.manga, this.chapterName).subscribe(chapter => this.chapterDetails = chapter);
+      this.chapterService.getChapterList(this.manga).subscribe(chapterList => this.allChapters = chapterList);
     });
-    let params = new HttpParams();
-    params = params.append("mangaName", this.manga);
-    this.http.get('https://localhost:7235/api/Mangas/chapters', { params: params }).subscribe(response => {
-      this.allChapters = response;
-    }, error => {
-      console.log(error);
-    })
-    params = new HttpParams();
-    params = params.append("mangaName", this.manga);
-    params = params.append("chapterName", this.chapterName);
-    this.http.get('https://localhost:7235/api/Mangas/chapters', { params: params }).subscribe(response => {
-      this.chapterDetails = response;
-      }, error => {
-        console.log(error);
-    })
-
   }
 
 }

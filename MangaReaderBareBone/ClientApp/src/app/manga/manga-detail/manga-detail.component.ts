@@ -1,7 +1,7 @@
-import { HttpParams, HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
+import { MangaService } from '../../services/manga.service';
 
 @Component({
   selector: 'app-manga-detail',
@@ -13,25 +13,14 @@ export class MangaDetailComponent implements OnInit {
   allChapters: any;
 
   constructor(private activatedRoute: ActivatedRoute,
-    private http: HttpClient) { }
+    private mangaservice: MangaService) { }
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => {
       this.manga = params['mangaName'];
+      this.mangaservice.getMangaDetails(this.manga).subscribe(detail => this.allChapters = detail);
     });
-    let params = new HttpParams();
-    params = params.append("mangaName", this.manga);
-    this.http.get('https://localhost:7235/api/MangaLogs/mangaName/', { responseType: 'text', params: params,  }).pipe(map(r => JSON.parse(r, this.reviver))).subscribe(response => {
-      this.allChapters = response;
-    }, error => {
-      console.log(error);
-    })
-  }
-  reviver(key: string, value: string | number | Date | null): any {
-    if (value !== null && (key === 'dateTime'))
-      return new Date(value).toLocaleString();
 
-    return value;
   }
 }
 

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { MangaService } from '../services/manga.service';
 
 
 @Component({
@@ -12,19 +12,10 @@ export class HomeComponent implements OnInit {
   latestManga: any;
   readManga: any;
 
-  constructor(private http: HttpClient) {
-
+  constructor(private mangaService: MangaService) {
   }
   ngOnInit() {
-    this.http.get('https://localhost:7235/api/Latest/manga?numDays=7&numManga=10').subscribe(response => {
-      this.latestManga = response;
-    }, error => {
-      console.log(error);
-    })
-    this.http.get('https://localhost:7235/api/Latest/mangaRead?numDays=7&numManga=10').subscribe(response => {
-      this.readManga = response;
-    }, error => {
-      console.log(error);
-    })
+    this.mangaService.getLatestChapters().subscribe(latestChapters => this.latestManga = latestChapters);
+    this.mangaService.getLastReadMangas().subscribe(lastReadChapters => this.readManga = lastReadChapters);
   }
 }
