@@ -1,6 +1,7 @@
+import { error } from '@angular/compiler/src/util';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ChapterService } from '../../services/chapter.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ChapterService} from '../../services/chapter.service';
 
 @Component({
   selector: 'app-manga-read',
@@ -13,15 +14,16 @@ export class MangaReadComponent implements OnInit {
   chapterDetails: any;
   allChapters: any;
   constructor(private activatedRoute: ActivatedRoute,
-    private chapterService: ChapterService) { }
+    private chapterService: ChapterService, private router: Router) { }
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => {
       this.manga = params['mangaName'];
       this.chapterName = params['chapterName'];
+      this.chapterService.postReadChapter(this.manga, this.chapterName);
       this.chapterService.getChapter(this.manga, this.chapterName).subscribe(chapter => this.chapterDetails = chapter);
       this.chapterService.getChapterList(this.manga).subscribe(chapterList => this.allChapters = chapterList);
     });
   }
-
 }
+

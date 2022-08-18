@@ -22,4 +22,15 @@ export class ChapterService {
     params = params.append("chapterName", chapterName);
     return this.http.get('https://localhost:7235/api/Mangas/chapters', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)));
   }
+
+  postReadChapter(mangaName: any, chapterName: any) {
+    let mangaLog = {
+      Status: "Read",
+      MangaName: mangaName,
+      ChapterName: chapterName
+    };
+    return this.http.post('https://localhost:7235/api/MangaLogs', mangaLog);
+  }
+
 }
+

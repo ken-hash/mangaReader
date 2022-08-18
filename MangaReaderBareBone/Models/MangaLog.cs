@@ -14,11 +14,11 @@ namespace MangaReaderBareBone.Models
         public DateTime DateTime { get; set; } = DateTime.Now;
         [ForeignKey("MangaId")]
         [Required]
-        public int MangaId { get; set; }
+        public int? MangaId { get; set; }
         [ForeignKey("MangaChaptersId")]
-        public virtual MangaChapters MangaChapters { get; set; }
+        public virtual MangaChapters? MangaChapters { get; set; }
         [Required]
-        public int MangaChaptersId { get; set; }
+        public int? MangaChaptersId { get; set; }
 
     }
 }

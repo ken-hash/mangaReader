@@ -1,11 +1,33 @@
-<div class="d-flex justify-content-between"></div>
-<section>
-  <div class="row">
-    <div class="text-center">
-      <!-- image is hosted in home server with path Manga/downloads/manganame/chaptername/-->
-      <div *ngFor="let chapter of chapterDetails">
-        <img class="img-fluid center-block" *ngFor='let image of chapter["path"].split(",")' src="http://192.168.50.11/Manga/downloads/{{manga}}/{{chapterName}}/{{image}}" alt="{{image}}"/>/>
+<div class="d-flex justify-content-between">
+    <div *ngFor="let oneChapter of chapterDetails">
+      <div *ngIf="oneChapter.previousChapter != undefined">
+          <a class="ch-prev-btn" [routerLink]="['/Manga/',manga, oneChapter.previousChapter]"> Previous </a>
+        <div *ngIf="oneChapter.nextChapter != undefined">
+          <a class="ch-next-btn" [routerLink]="['/Manga/',manga, oneChapter.nextChapter]"> Next </a>
+        </div>
       </div>
+    </div>
+</div>
+<section>
+  <div class="text-center">
+
+    <!-- image is hosted in home server with path Manga/downloads/manganame/chaptername/-->
+    <div *ngFor="let chapter of chapterDetails">
+      <img class="img-fluid center-block" *ngFor='let image of chapter["path"].split(",")' src="http://192.168.50.11/Manga/downloads/{{manga}}/{{chapterName}}/{{image}}" alt="{{image}}" />
     </div>
   </div>
 </section>
+<div class="d-flex justify-content-between">
+  <div *ngFor="let oneChapter of chapterDetails">
+    <div *ngIf="oneChapter.previousChapter != undefined">
+      <a class="ch-prev-btn" [routerLink]="['/Manga/',manga, oneChapter.previousChapter]">
+        Previous <i class="fas fa-angle-left"></i>
+      </a>
+    </div>
+    <div *ngIf="oneChapter.nextChapter != undefined">
+      <a class="ch-next-btn" [routerLink]="['/Manga/',manga, oneChapter.nextChapter]">
+        Next <i class="fas fa-angle-right"></i>
+      </a>
+    </div>
+  </div>
+</div>

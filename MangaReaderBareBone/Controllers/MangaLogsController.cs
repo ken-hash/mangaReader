@@ -1,4 +1,5 @@
 ﻿using MangaReaderBareBone.Data;
+using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -93,7 +94,7 @@ namespace MangaReaderBareBone.Controllers
         }
 
         [HttpPost]
-        public ActionResult<MangaLog> PostMangaLog(MangaLog log)
+        public async Task<ActionResult<MangaLogDTO>> PostMangaLogAsync([FromBody] MangaLogDTO log)
         {
             if (!ModelState.IsValid)
             {
@@ -103,12 +104,30 @@ namespace MangaReaderBareBone.Controllers
             {
                 return Problem("Can't connect to database");
             }
-            return Problem("Disabled Post");
+            if (string.IsNullOrWhiteSpace(log.MangaName) || string.IsNullOrEmpty(log.ChapterName))
+            {
+                return BadRequest("Invalid Request");
+            }
+            int? mangaId = _context.Mangas.FirstOrDefault(e=>e.Name.ToLower() == log.MangaName.ToLower())?.MangaId;
+            if (mangaId == null)
+            {
+                return BadRequest("invalid manga");
+            }
+            int? chapterId = _context.MangaChapters?.FirstOrDefault(e => e.MangaId == mangaId && e.MangaChapter.ToLower() == log.ChapterName.ToLower())?.MangaChaptersId;
+            if (chapterId == null)
+            {
+                return BadRequest("invalid chapter");
+            }
+            MangaLog newLog = new MangaLog
+            {
+                Status = log.Status,
+                MangaId = mangaId!,
+                MangaChaptersId = chapterId!
+            };
 
-            /*
-            _context.MangaLogs.Add(log);
-            _context.SaveChangesAsync();*/
-
+            _context.MangaLogs.Add(newLog);
+            await _context.SaveChangesAsync();
+            return Ok("Success");
         }
 
 

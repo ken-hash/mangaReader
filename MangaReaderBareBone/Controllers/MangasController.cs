@@ -60,7 +60,7 @@ namespace MangaReaderBareBone.Controllers
             {
                 return NotFound();
             }
-            IQueryable<Manga> mangaList = _context.Mangas.Take(max ?? 1);
+            IQueryable<Manga> mangaList = _context.Mangas.OrderBy(e=>e.MangaId).Take(max ?? 1);
             mangaList.ToList().ForEach(manga => GetMangaChapters(manga.MangaId, maxChapters: 1));
             return mangaList.Where(manga => manga.Chapters.Count > 0).ToList();
         }
@@ -75,7 +75,7 @@ namespace MangaReaderBareBone.Controllers
             }
             if (string.IsNullOrEmpty(chapterName))
             {
-                if (maxChapters.HasValue)
+                if (maxChapters.HasValue && maxChapters == 1)
                 {
                     MangaChapters? latestChapter = _context.MangaChapters?.OrderBy(o => o.MangaChaptersId).LastOrDefault(e => e.MangaId == mangaId);
                     List<MangaChapters> latestChapterList = new List<MangaChapters>();
@@ -89,7 +89,7 @@ namespace MangaReaderBareBone.Controllers
             }
             else
             {
-                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter.ToLower() == chapterName.ToLower()).Take(maxChapters ?? 1).ToList();
+                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter.ToLower() == chapterName.ToLower()).OrderBy(e=>e.MangaChaptersId).Take(maxChapters ?? 1).ToList();
             }
         }
 
@@ -125,7 +125,7 @@ namespace MangaReaderBareBone.Controllers
             {
                 return NotFound();
             }
-            List<MangaChapters>? mangaChapters = GetMangaChapters(manga.MangaId, chapterName);
+            List<MangaChapters>? mangaChapters = string.IsNullOrWhiteSpace(chapterName)? GetMangaChapters(manga.MangaId, chapterName, 10000): GetMangaChapters(manga.MangaId, chapterName);
             List<MangaChapters>? fullChapterList = _context.MangaChapters?.Where(e => e.MangaId == manga.MangaId).ToList();
             if (mangaChapters != null && fullChapterList != null)
             {
