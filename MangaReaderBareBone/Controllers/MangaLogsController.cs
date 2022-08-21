@@ -51,7 +51,7 @@ namespace MangaReaderBareBone.Controllers
             Manga? manga = await _context.Mangas.FindAsync(id);
             if (manga != null)
             {
-                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId);
+                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added");
                 if (mangaLog == null)
                 {
                     return NotFound();
@@ -69,7 +69,7 @@ namespace MangaReaderBareBone.Controllers
 
         //Retrieving all logs for manga using manga name with sort as second parameter
         [HttpGet("mangaName")]
-        public async Task<ActionResult<List<MangaLog>>> GetMangaLogByMangaID(string? mangaName, string? sort = "asc")
+        public async Task<ActionResult<List<MangaLog>>> GetMangaLogByMangaName(string? mangaName, string? sort = "asc")
         {
             if (_context.MangaLogs == null || string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null)
             {
@@ -78,7 +78,7 @@ namespace MangaReaderBareBone.Controllers
             Manga? manga = await _context.Mangas.FirstOrDefaultAsync(manga => manga.Name.ToLower() == mangaName.ToLower());
             if (manga != null)
             {
-                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId);
+                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added");
                 if (mangaLog == null)
                 {
                     return NotFound();
@@ -108,7 +108,7 @@ namespace MangaReaderBareBone.Controllers
             {
                 return BadRequest("Invalid Request");
             }
-            int? mangaId = _context.Mangas.FirstOrDefault(e=>e.Name.ToLower() == log.MangaName.ToLower())?.MangaId;
+            int? mangaId = _context.Mangas.FirstOrDefault(e => e.Name.ToLower() == log.MangaName.ToLower())?.MangaId;
             if (mangaId == null)
             {
                 return BadRequest("invalid manga");
@@ -117,6 +117,13 @@ namespace MangaReaderBareBone.Controllers
             if (chapterId == null)
             {
                 return BadRequest("invalid chapter");
+            }
+            MangaLog? mangaLog = _context.MangaLogs.FirstOrDefault(e => e.MangaChaptersId == chapterId && e.MangaId == mangaId && e.Status == "Read");
+            if (mangaLog != null)
+            {
+                mangaLog.DateTime = DateTime.Now;
+                await _context.SaveChangesAsync();
+                return Ok("Saved");
             }
             MangaLog newLog = new MangaLog
             {

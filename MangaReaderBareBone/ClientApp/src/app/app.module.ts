@@ -36,7 +36,7 @@ import { MangaService } from './services/manga.service';
       { path: '404', component: PageNotFoundComponent },
       { path: '**', redirectTo: '404' }
 
-    ])
+    ], { scrollPositionRestoration: 'enabled' })
   ],
   providers: [
     ChapterService,
