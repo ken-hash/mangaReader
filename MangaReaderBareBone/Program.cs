@@ -9,15 +9,23 @@ builder.Services.AddDbContext<MangaReaderBareBoneContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MangaReaderBareBoneContext") ?? throw new InvalidOperationException("Connection string 'MangaReaderBareBoneContext' not found.")));
 
 // Add services to the container.
-builder.Services.AddCors();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "AllowCORS", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseDeveloperExceptionPage();
+
 }
 
 app.UseHttpsRedirection();
@@ -29,13 +37,14 @@ app.UseStaticFiles(new StaticFileOptions()
     ))
 #else
     FileProvider = new PhysicalFileProvider(
-    Path.Combine("\\\\192.168.50.10\\pi"
+    Path.Combine("\\\\192.168.50.10","pi"
     ))
 #endif
 });
 
+app.UseCors("AllowCORS");
+app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
