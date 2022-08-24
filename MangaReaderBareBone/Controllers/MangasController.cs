@@ -108,7 +108,7 @@ namespace MangaReaderBareBone.Controllers
         [HttpGet("chapters")]
         public async Task<ActionResult<List<MangaChapterDTO>>> GetChapters(int? mangaId, string? mangaName, string? chapterName)
         {
-            if (_context.Mangas == null || (!mangaId.HasValue && string.IsNullOrEmpty(mangaName)))
+            if (_context.Mangas == null || _context.MangaChapters == null || (!mangaId.HasValue && string.IsNullOrEmpty(mangaName)))
             {
                 return NotFound();
             }
@@ -125,8 +125,14 @@ namespace MangaReaderBareBone.Controllers
             {
                 return NotFound();
             }
-            List<MangaChapters>? mangaChapters = string.IsNullOrWhiteSpace(chapterName)? GetMangaChapters(manga.MangaId, chapterName, 10000): GetMangaChapters(manga.MangaId, chapterName);
-            List<MangaChapters>? fullChapterList = _context.MangaChapters?.Where(e => e.MangaId == manga.MangaId).ToList();
+            List<MangaChapters>? mangaChapters = string.IsNullOrWhiteSpace(chapterName) ? GetMangaChapters(manga.MangaId, chapterName, 10000) : GetMangaChapters(manga.MangaId, chapterName);
+            var logsAndChapters = _context.MangaLogs?.Join(_context.MangaChapters, logs => logs.MangaChaptersId, chapters => chapters.MangaChaptersId, (logs, chapters) => new
+            {
+                MangaLog = logs,
+                MangaChapters = chapters
+            }).Where(logsAndChapters => logsAndChapters.MangaLog.Status == "Added" && logsAndChapters.MangaLog.MangaId == manga.MangaId);
+
+            List<MangaChapters> fullChapterList = logsAndChapters!.ToList().OrderBy(e => e.MangaLog.DateTime).Select(e => e.MangaChapters).ToList();
             if (mangaChapters != null && fullChapterList != null)
             {
                 return mangaChapters.toDTOList(fullChapterList);

@@ -51,7 +51,7 @@ namespace MangaReaderBareBone.Controllers
             Manga? manga = await _context.Mangas.FindAsync(id);
             if (manga != null)
             {
-                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added");
+                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added").OrderBy(e => e.DateTime); ;
                 if (mangaLog == null)
                 {
                     return NotFound();
@@ -78,7 +78,7 @@ namespace MangaReaderBareBone.Controllers
             Manga? manga = await _context.Mangas.FirstOrDefaultAsync(manga => manga.Name.ToLower() == mangaName.ToLower());
             if (manga != null)
             {
-                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added");
+                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added").OrderBy(e=>e.DateTime);
                 if (mangaLog == null)
                 {
                     return NotFound();
