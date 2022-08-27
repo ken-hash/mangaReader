@@ -3,7 +3,6 @@ using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 namespace MangaReaderBareBone.Controllers
 {
     /// <summary>
@@ -69,13 +68,13 @@ namespace MangaReaderBareBone.Controllers
 
         //Retrieving all logs for manga using manga name with sort as second parameter
         [HttpGet("mangaName")]
-        public async Task<ActionResult<List<MangaLog>>> GetMangaLogByMangaName(string? mangaName, string? sort = "asc")
+        public ActionResult<List<MangaLog>> GetMangaLogByMangaName(string? mangaName, string? sort = "asc")
         {
-            if (_context.MangaLogs == null || string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null)
+            if (_context.MangaLogs == null || string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null || _context.Mangas == null)
             {
                 return NotFound();
             }
-            Manga? manga = await _context.Mangas.FirstOrDefaultAsync(manga => manga.Name.ToLower() == mangaName.ToLower());
+            Manga? manga = _context.Mangas.FirstOrDefault(manga => manga.Name.ToLower() == mangaName.ToLower());
             if (manga != null)
             {
                 IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added").OrderBy(e=>e.DateTime);

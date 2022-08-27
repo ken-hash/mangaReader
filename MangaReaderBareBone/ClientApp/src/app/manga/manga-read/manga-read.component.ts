@@ -36,5 +36,9 @@ export class MangaReadComponent implements OnInit {
       top = null;
     }
   }
+
+  onChangeObj(chapter: any) {
+    this.router.navigate(['Manga',this.manga, chapter]);
+  }
 }
 

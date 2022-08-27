@@ -14,3 +14,10 @@ code {
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
+
+
+@charset "utf-8";
+
+@import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
+
+@import "../node_modules/bulma/bulma.sass";

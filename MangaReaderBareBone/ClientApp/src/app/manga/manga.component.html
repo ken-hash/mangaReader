@@ -1,28 +1,40 @@
-<h2>All Manga List</h2>
-
-<div class="d-flex justify-content-between"></div>
-<section>
-  <table class="table table-bordered " style="width:100%">
-    <thead>
-      <tr>
-        <th>
-          Manga Name
-        </th>
-        <th>
-          Latest Chapter
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let manga of allManga">
-        <td>
-          <a [routerLink]="['/Manga/',manga.name]">{{manga.name}} </a>
-        </td>
-          <td *ngFor ="let chapter of manga.chapters">
-            <a [routerLink]="['/Manga/',manga.name, chapter.mangaChapter]">{{chapter.mangaChapter}} </a>
-          </td>
-      </tr>
-    </tbody>
-  </table>
-</section>
-
+<div class='container has-text-centered'>
+  <div class='columns is-mobile is-centered'>
+    <div class='column is-8'>
+      <div>
+        <h1 class="title">Manga List</h1>
+      </div>
+      <div class="d-flex justify-content-between"></div>
+      <section>
+        <table class="table table-bordered " style="width:100%">
+          <thead>
+            <tr>
+              <th>
+                Manga Name
+              </th>
+              <th>
+                Last Read Chapters
+              </th>
+              <th>
+                Latest Chapter
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let manga of allManga">
+              <td>
+                <a [routerLink]="['/Manga/',manga.mangaName]">{{manga.mangaName}} </a>
+              </td>
+              <td>
+                <a [routerLink]="['/Manga/',manga.mangaName, manga.lastChapterRead]">{{manga.lastChapterRead}} </a>
+              </td>
+              <td>
+                <a [routerLink]="['/Manga/',manga.mangaName, manga.chaptersAdded[0]]">{{manga.chaptersAdded[0]}} </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      </div>
+    </div>
+  </div>

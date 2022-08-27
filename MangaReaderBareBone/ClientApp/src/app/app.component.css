@@ -1,9 +1,10 @@
 
-html, body {
-  background-color: #212529;
-  color: white;
-  height: 100vh;
+html,
+body,
+#background {
   width: 100vw;
+  min-height: 100vh;
+  background-color: #212529;
 }
 
 .border-top {
@@ -22,11 +23,11 @@ html, body {
 }
 
 .footer {
-  position: revert;
+  position: relative;
   bottom: 0;
   width: 100%;
   white-space: nowrap;
-  line-height: 60px;
+  line-height: 20px;
 }
 
 a{
