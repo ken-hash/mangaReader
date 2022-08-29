@@ -8,5 +8,6 @@ h1 {
 }
 
 .table th {
-  font-size: 17px
+  font-size: 17px;
+  text-align: center
 }
