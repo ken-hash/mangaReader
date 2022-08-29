@@ -1,16 +1,22 @@
-<select class="form-group" #chapter (change)="onChangeObj(chapter.value)" name="myDropdown">
-  <option disabled selected>Chapter: {{chapterName}}</option>
-  <option *ngFor="let chapter of allChapters" value="{{chapter.mangaChapter}}">Chapter: {{chapter.mangaChapter}}  </option>
-</select>
-
-<div class="d-flex justify-content-between">
-  <div *ngIf="chapterDetails[0].previousChapter !== undefined">
-    <a class="button is-primary" [routerLink]="['/Manga/',manga, chapterDetails[0].previousChapter]"> Previous </a>
-  </div>
-  <div *ngIf="chapterDetails[0].nextChapter !== undefined">
-    <a class="button is-primary" [routerLink]="['/Manga/',manga, chapterDetails[0].nextChapter]"> Next </a>
+<div class="container-fluid">
+  <select class="form-group" #chapter (change)="onChangeObj(chapter.value)" name="myDropdown">
+    <option disabled selected>Chapter: {{chapterName}}</option>
+    <option *ngFor="let chapter of allChapters" value="{{chapter.mangaChapter}}">Chapter: {{chapter.mangaChapter}}  </option>
+  </select>
+  <div class="d-flex justify-content-end">
+    <div class="col-sm-1">
+      <div *ngIf="chapterDetails[0].previousChapter !== null">
+        <a class="button is-dark is-rounded" [routerLink]="['/Manga/',manga, chapterDetails[0].previousChapter]"> Previous </a>
+      </div>
+    </div>
+    <div class="col-sm-1">
+      <div *ngIf="chapterDetails[0].nextChapter !== null">
+        <a class="button is-dark is-rounded" [routerLink]="['/Manga/',manga, chapterDetails[0].nextChapter]"> Next </a>
+      </div>
+    </div>
   </div>
 </div>
+
 <section>
   <div class="text-center" id="top">
     <!-- image is hosted in home server with path Manga/downloads/manganame/chaptername/-->
@@ -19,13 +25,18 @@
     </div>
   </div>
 </section>
-<div class="d-flex justify-content-between">
-  <div *ngIf="chapterDetails[0].previousChapter !== undefined">
-    <a class="button is-primary" [routerLink]="['/Manga/',manga, chapterDetails[0].previousChapter]"> Previous </a>
-  </div>
-  <div *ngIf="chapterDetails[0].nextChapter !== undefined">
-    <a class="button is-primary" [routerLink]="['/Manga/',manga, chapterDetails[0].nextChapter]"> Next </a>
+<div class="container-fluid">
+  <div class="d-flex justify-content-end">
+    <div class="col-sm-1">
+      <div *ngIf="chapterDetails[0].previousChapter !== null">
+        <a class="button is-dark is-rounded" [routerLink]="['/Manga/',manga, chapterDetails[0].previousChapter]"> Previous </a>
+      </div>
+    </div>
+    <div class="col-sm-1">
+      <div *ngIf="chapterDetails[0].nextChapter !== null">
+        <a class="button is-dark is-rounded" [routerLink]="['/Manga/',manga, chapterDetails[0].nextChapter]"> Next </a>
+      </div>
+    </div>
   </div>
 </div>
-
 
