@@ -9,7 +9,7 @@ import { MangaService } from '../../services/manga.service';
   styleUrls: ['./manga-detail.component.css']
 })
 export class MangaDetailComponent implements OnInit {
-  manga: any;
+  manga: string | undefined;
   allChapters: any;
 
   constructor(private activatedRoute: ActivatedRoute,
@@ -18,7 +18,7 @@ export class MangaDetailComponent implements OnInit {
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => {
       this.manga = params['mangaName'];
-      this.mangaservice.getMangaDetails(this.manga).subscribe(detail => this.allChapters = detail);
+      this.mangaservice.getMangaDetails(this.manga!).subscribe(detail => this.allChapters = detail);
     });
 
   }
