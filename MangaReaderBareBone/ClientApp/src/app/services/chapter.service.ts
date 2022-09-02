@@ -14,7 +14,7 @@ export class ChapterService {
   getChapterList(mangaName: string) {
     let params = new HttpParams();
     params = params.append("mangaName", mangaName);
-    return this.http.get('/api/Mangas/chapters', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)));
+    return this.http.get<ChapterDetails[]>('/api/Mangas/chapters', { params: params });
 
   }
 
