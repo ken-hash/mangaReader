@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { MangaService } from '../services/manga.service';
 
 @Component({
@@ -11,9 +13,13 @@ export class MangaComponent implements OnInit {
   allManga: any;
 
   constructor(private activatedRoute: ActivatedRoute,
-    private mangaService: MangaService  ) { }
+    private mangaService: MangaService,
+    private router: Router,
+    private titleService: Title
+  ) { }
 
   ngOnInit(): void {
+    this.titleService.setTitle("MangaReader: Manga List");
     this.mangaService.getMangaList(20).subscribe(list => this.allManga = list);
   }
 

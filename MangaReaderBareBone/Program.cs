@@ -37,7 +37,7 @@ app.UseStaticFiles(new StaticFileOptions()
     ))
 #else
     FileProvider = new PhysicalFileProvider(
-    Path.Combine("\\\\192.168.50.10","pi"
+    Path.Combine("\\\\192.168.50.10", "pi"
     ))
 #endif
 });

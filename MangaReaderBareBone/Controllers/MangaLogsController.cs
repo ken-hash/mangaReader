@@ -77,7 +77,7 @@ namespace MangaReaderBareBone.Controllers
             Manga? manga = _context.Mangas.FirstOrDefault(manga => manga.Name.ToLower() == mangaName.ToLower());
             if (manga != null)
             {
-                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added").OrderBy(e=>e.DateTime);
+                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added").OrderBy(e => e.DateTime);
                 if (mangaLog == null)
                 {
                     return NotFound();
