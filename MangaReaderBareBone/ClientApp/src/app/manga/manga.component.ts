@@ -20,7 +20,7 @@ export class MangaComponent implements OnInit {
 
   ngOnInit(): void {
     this.titleService.setTitle("MangaReader: Manga List");
-    this.mangaService.getMangaList(20).subscribe(list => this.allManga = list);
+    this.mangaService.getMangaList(1000).subscribe(list => this.allManga = list);
   }
 
 }

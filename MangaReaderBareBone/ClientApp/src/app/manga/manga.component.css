@@ -3,9 +3,11 @@ h1 {
   margin-bottom: 20px;
 }
 
-.table td {
-  font-size: 17px
+td {
+  vertical-align: middle;
+  text-align: center !important;
 }
+
 
 .table th {
   font-size: 17px;

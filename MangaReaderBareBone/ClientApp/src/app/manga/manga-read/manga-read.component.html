@@ -1,32 +1,28 @@
-<div class="container">
-      <select class="form-group" #chapter (change)="onChangeObj(chapter.value)" name="myDropdown">
-        <option disabled selected>Chapter: {{chapterName}}</option>
-        <option *ngFor="let chapter of allChapters" value="{{chapter.mangaChapter}}">Chapter: {{chapter.mangaChapter}}  </option>
-      </select>
-      <span class="d-flex justify-content-end">
-        <span class="row-cols-md-1">
-          <button class="button is-dark is-rounded" [disabled]="chapterDetails!.previousChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.previousChapter]"> < Previous </button>
-        </span>
-        <span class="row-cols-md-1">
-          <button class="button is-dark is-rounded" [disabled]="chapterDetails!.nextChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.nextChapter]"> Next ></button>
-        </span>
-      </span>
-</div>
-
-<section>
-  <div class="text-center" id="top">
-    <!-- image is hosted in home server with path Manga/downloads/manganame/chaptername/-->
-      <img class="img-fluid center-block" *ngFor='let image of chapterDetails!.path.split(",")' src="http://192.168.50.11/Manga/downloads/{{manga}}/{{chapterName}}/{{image}}" alt="{{image}}" />
+<div class='container has-text-centered'>
+<div class='column'>
+    <h1 class="title"><a [routerLink]="['/Manga/',manga]">{{manga!.toUpperCase().replaceAll('-',' ')}}</a> - {{chapterName}}</h1>
   </div>
-</section>
+</div>
 <div class="container-fluid">
-  <div class="d-flex justify-content-end">
-    <div class="row-cols-sm-1">
-        <button class="button is-dark is-rounded" [disabled]="chapterDetails!.previousChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.previousChapter]"> < Previous </button>
+  <select class="form-group col-md-auto" #chapter (change)="onChangeObj(chapter.value)" name="myDropdown">
+    <option disabled selected>Chapter: {{chapterName}}</option>
+    <option *ngFor="let chapter of allChapters" value="{{chapter.mangaChapter}}">Chapter: {{chapter.mangaChapter}}  </option>
+  </select>
+  <div class="d-inline-flex float-xxl-end">
+    <button class="button is-dark is-rounded" [disabled]="chapterDetails!.previousChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.previousChapter]"> < Previous </button>
+    <button class="button is-dark is-rounded" [disabled]="chapterDetails!.nextChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.nextChapter]"> Next ></button>
+  </div>
+</div>
+  <section>
+    <div class="text-center" id="top">
+      <!-- image is hosted in home server with path Manga/downloads/manganame/chaptername/-->
+      <img class="img-fluid center-block" *ngFor='let image of chapterDetails!.path.split(",")' src="http://192.168.50.11/Manga/downloads/{{manga}}/{{chapterName}}/{{image}}" alt="{{image}}" />
     </div>
-    <div class="row-cols-sm-1">
+  </section>
+  <div class="container-fluid">
+    <div class="d-flex justify-content-xxl-end">
+        <button class="button is-dark is-rounded" [disabled]="chapterDetails!.previousChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.previousChapter]"> < Previous </button>
         <button class="button is-dark is-rounded" [disabled]="chapterDetails!.nextChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.nextChapter]"> Next ></button>
     </div>
   </div>
-</div>
 
