@@ -1,12 +1,20 @@
 a.navbar-brand {
   white-space: normal;
-  text-align: center;
+  text-align: initial;
   word-break: break-all;
+  margin-top: 10px;
+  font-size: 25px;
+}
+
+.navbar {
+  padding-top: 0rem !important;
+  padding-bottom: 0rem !important;
 }
 
 html {
   font-size: 14px;
 }
+
 @media (min-width: 768px) {
   html {
     font-size: 16px;

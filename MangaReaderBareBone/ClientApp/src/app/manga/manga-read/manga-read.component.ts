@@ -30,7 +30,10 @@ export class MangaReadComponent implements OnInit {
           this.router.navigate(['/404']);
       });
       this.titleService.setTitle(`${this.manga?.toUpperCase().replaceAll("-", " ")} ${this.chapterName}`);
-      this.chapterService.getChapter(this.manga!, this.chapterName!).subscribe(chapter => this.chapterDetails = chapter);
+      this.chapterService.getChapter(this.manga!, this.chapterName!).subscribe(chapter => {this.chapterDetails = chapter}, err => {
+        if (err.status == 404)
+          this.router.navigate(['/404']);
+      });
       this.chapterService.getChapterList(this.manga!).subscribe(chapterList => this.allChapters = chapterList);
     });
   }

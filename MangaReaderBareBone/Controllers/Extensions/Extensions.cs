@@ -15,6 +15,12 @@ namespace MangaReaderBareBone.Controllers.Extensions
             return results.Where(x => x.Item2).Select(x => x.Item1);
         }
 
+        /// <summary>
+        /// Extension to transform Manga Object to MangaDTO 
+        /// </summary>
+        /// <param name="manga"></param>
+        /// <param name="lastRead"></param>
+        /// <returns></returns>
         public static MangasDTO toDTO(this Manga manga, MangaChapters? lastRead)
         {
             MangasDTO mangaDTO = new MangasDTO
@@ -26,6 +32,14 @@ namespace MangaReaderBareBone.Controllers.Extensions
             return mangaDTO;
         }
 
+        /// <summary>
+        /// Extension to transform MangaChapter Object to MangaChaptersDTO
+        /// by retreiving previous/next chapters based on arrangement of
+        /// all Added chapters of the selected manga by date
+        /// </summary>
+        /// <param name="chapter"></param>
+        /// <param name="fullChapterList"></param>
+        /// <returns></returns>
         public static MangaChapterDTO toDTO(this MangaChapters chapter, IEnumerable<MangaChapters> fullChapterList)
         {
             MangaChapterDTO mangaChapterDTO = new MangaChapterDTO
@@ -50,6 +64,12 @@ namespace MangaReaderBareBone.Controllers.Extensions
             return mangaChapterDTO;
         }
 
+        /// <summary>
+        /// Extension to transform MangaChapterList into MangaChaptersDTOList
+        /// </summary>
+        /// <param name="chapterList"></param>
+        /// <param name="fullChapterList"></param>
+        /// <returns></returns>
         public static List<MangaChapterDTO> toDTOList(this List<MangaChapters> chapterList, IEnumerable<MangaChapters> fullChapterList)
         {
             List<MangaChapterDTO> mangaChapterDTOList = new List<MangaChapterDTO>();
@@ -60,7 +80,11 @@ namespace MangaReaderBareBone.Controllers.Extensions
             return mangaChapterDTOList;
         }
 
-
+        /// <summary>
+        /// Extension to strip MangaChaptersList into List of Strings of MangaChapters
+        /// </summary>
+        /// <param name="chapterList"></param>
+        /// <returns></returns>
         public static List<string?> toChapterList(this IEnumerable<MangaChapters> chapterList)
         {
             List<string?> result = new List<string?>();

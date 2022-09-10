@@ -28,7 +28,7 @@ namespace MangaReaderBareBone.Controllers
             List<Manga> latestManga = new List<Manga>();
             var addedMangaInDays = _context.Mangas?.Join(_context.MangaLogs, manga => manga.MangaId, logs => logs.MangaId, (manga, logs) => new
             { Mangas = manga, MangaLogs = logs }
-            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Added" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays));
+            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Added" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays!));
             if (addedMangaInDays == null)
             {
                 return NotFound();
@@ -71,7 +71,7 @@ namespace MangaReaderBareBone.Controllers
             List<Manga> latestManga = new List<Manga>();
             var addedMangaInDays = _context.Mangas?.Join(_context.MangaLogs, manga => manga.MangaId, logs => logs.MangaId, (manga, logs) => new
             { Mangas = manga, MangaLogs = logs }
-            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Read" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays));
+            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Read" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays!));
             if (addedMangaInDays == null)
             {
                 return NotFound();

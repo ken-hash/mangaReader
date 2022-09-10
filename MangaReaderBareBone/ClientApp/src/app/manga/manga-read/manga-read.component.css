@@ -31,3 +31,14 @@ select {
   border-image: initial;
   border-radius: 0px;
 }
+
+/* Added as weird interaction with not centering first image*/
+#top{
+    margin-bottom: 10px;
+}
+
+.img-fluid {
+  display: flow;
+  margin-left: auto;
+  margin-right: auto;
+}

@@ -1,11 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace MangaReaderBareBone.Models
 {
+    /// <summary>
+    /// Manga Table in which holds description of Manga
+    /// </summary>
     public class Manga
     {
         [Key]
         public int MangaId { get; set; }
+
         [Required]
         public string Name { get; set; }
 
