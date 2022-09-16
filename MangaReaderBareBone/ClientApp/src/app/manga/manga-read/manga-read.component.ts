@@ -14,6 +14,8 @@ export class MangaReadComponent implements OnInit {
   chapterName: string | undefined;
   chapterDetails: ChapterDetails | undefined;
   allChapters: any;
+  loading: boolean = true
+
   constructor(private activatedRoute: ActivatedRoute,
     private chapterService: ChapterService,
     private router: Router,
@@ -49,6 +51,10 @@ export class MangaReadComponent implements OnInit {
 
   onChangeObj(chapter: any) {
     this.router.navigate(['Manga',this.manga, chapter]);
+  }
+
+  onLoad() {
+    this.loading = false;
   }
 }
 
