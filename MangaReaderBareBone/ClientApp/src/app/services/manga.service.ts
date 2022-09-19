@@ -36,8 +36,22 @@ export class MangaService {
   }
 
   reviver(key: string, value: string | number | Date | null): any {
-    if (value !== null && (key === 'dateTime'))
-      return new Date(value).toLocaleString();
+    let elapsed = undefined;
+    if (value !== null && (key === 'dateTime')) {
+      elapsed = new Date().getTime() - new Date(value).getTime();
+      if (Math.trunc(elapsed / (1000 * 60 * 60 * 24 * 7 * 4)) > 0) {
+        return (elapsed / (1000 * 60 * 60 * 24 * 7* 4)).toFixed(0) + " months ago";
+      }
+      if (Math.trunc(elapsed / (1000 * 60 * 60 * 24)) > 7) {
+        return (elapsed / (1000 * 60 * 60 * 24 * 7)).toFixed(0) + " weeks ago";
+      }
+      else if (Math.trunc(elapsed/(1000 * 60 * 60 * 24)) > 0) {
+        return (elapsed / (1000 * 60 * 60 * 24)).toFixed(0) + " days ago";
+      }
+      else {
+        return (elapsed / (1000 * 60 * 60)).toFixed(1) + " hours ago";
+      }
+    }
     return value;
   }
 

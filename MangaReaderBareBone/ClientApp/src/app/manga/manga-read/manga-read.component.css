@@ -33,12 +33,17 @@ select {
 }
 
 /* Added as weird interaction with not centering first image*/
-#top{
-    margin-bottom: 10px;
+#top {
+  margin-bottom: 15px;
 }
 
 .img-fluid {
   display: flow;
   margin-left: auto;
   margin-right: auto;
+}
+
+#bottom {
+  margin-top: 4px;
+  margin-bottom: 41px;
 }

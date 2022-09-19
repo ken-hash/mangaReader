@@ -1,5 +1,5 @@
 <div class='container has-text-centered'>
-<div class='column'>
+  <div class='column'>
     <h1 class="title"><a [routerLink]="['/Manga/',manga]">{{manga!.toUpperCase().replaceAll('-',' ')}}</a> - {{chapterName}}</h1>
   </div>
 </div>
@@ -17,14 +17,14 @@
   <div id="top"></div>
   <!-- image is hosted in home server with path Manga/downloads/manganame/chaptername/-->
   <div *ngFor='let image of chapterDetails!.path.split(",")'>
-    <img *ngIf="loading" src="http://192.168.50.11/loading.gif" alt="loading" />
+    <img *ngIf="loading" src="loading.gif" alt="loading" />
     <img class="img-fluid" [hidden]="loading" (load)="onLoad()" src="http://192.168.50.11/Manga/downloads/{{manga}}/{{chapterName}}/{{image}}" alt="{{image}}" />
   </div>
 </section>
-  <div class="container-fluid">
-    <div class="d-flex justify-content-end">
-        <button class="button is-dark is-rounded" [disabled]="chapterDetails!.previousChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.previousChapter]"> < Previous </button>
-        <button class="button is-dark is-rounded" [disabled]="chapterDetails!.nextChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.nextChapter]"> Next ></button>
-    </div>
+<div class="container-fluid" id="bottom">
+  <div class="d-flex float-end">
+    <button class="button is-dark is-rounded" [disabled]="chapterDetails!.previousChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.previousChapter]"> < Previous </button>
+    <button class="button is-dark is-rounded" [disabled]="chapterDetails!.nextChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.nextChapter]"> Next ></button>
   </div>
+</div>
 
