@@ -19,7 +19,7 @@ namespace MangaReaderBareBone.Controllers
 
         // Get latest number of numManga mangas and chapters(max 10) added in the last past numdays
         [HttpGet("manga")]
-        public async Task<ActionResult<List<Manga>>> GetLatestChapters(int? numDays = 7, int? numManga = 10)
+        public async Task<ActionResult<List<Manga>>> GetLatestChapters(int? numDays = 3, int? numManga = 10)
         {
             if (_context.Mangas == null || _context.MangaLogs == null || _context.MangaChapters == null)
             {
@@ -28,7 +28,7 @@ namespace MangaReaderBareBone.Controllers
             List<Manga> latestManga = new List<Manga>();
             var addedMangaInDays = _context.Mangas?.Join(_context.MangaLogs, manga => manga.MangaId, logs => logs.MangaId, (manga, logs) => new
             { Mangas = manga, MangaLogs = logs }
-            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Added" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays!));
+            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Added" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays));
             if (addedMangaInDays == null)
             {
                 return NotFound();
@@ -54,7 +54,8 @@ namespace MangaReaderBareBone.Controllers
                     continue;
                 }
 
-                latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters.Add(chapterToAdd);
+                latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters?.Add(chapterToAdd);
+
             }
             return latestManga;
         }
@@ -71,7 +72,7 @@ namespace MangaReaderBareBone.Controllers
             List<Manga> latestManga = new List<Manga>();
             var addedMangaInDays = _context.Mangas?.Join(_context.MangaLogs, manga => manga.MangaId, logs => logs.MangaId, (manga, logs) => new
             { Mangas = manga, MangaLogs = logs }
-            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Read" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays!));
+            ).Where(mangaAndLogs => mangaAndLogs.MangaLogs.Status == "Read" && mangaAndLogs.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays));
             if (addedMangaInDays == null)
             {
                 return NotFound();

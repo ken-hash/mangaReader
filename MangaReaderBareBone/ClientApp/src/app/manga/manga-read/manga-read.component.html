@@ -18,7 +18,7 @@
   <!-- image is hosted in home server with path Manga/downloads/manganame/chaptername/-->
   <div *ngFor='let image of chapterDetails!.path.split(",")'>
     <img *ngIf="loading" src="loading.gif" alt="loading" />
-    <img class="img-fluid" [hidden]="loading" (load)="onLoad()" src="http://192.168.50.11/Manga/downloads/{{manga}}/{{chapterName}}/{{image}}" alt="{{image}}" />
+    <img class="img-fluid" [hidden]="loading" (load)="onLoad()" src="/downloads/{{manga}}/{{chapterName}}/{{image}}" alt="{{image}}" />
   </div>
 </section>
 <div class="container-fluid" id="bottom">
