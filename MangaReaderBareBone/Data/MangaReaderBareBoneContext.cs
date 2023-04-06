@@ -9,7 +9,7 @@ namespace MangaReaderBareBone.Data
         {
         }
 
-        public DbSet<MangaReaderBareBone.Models.Manga>? Mangas { get; set; }
+        public DbSet<MangaReaderBareBone.Models.Manga> Mangas { get; set; } = default!;
 
         public DbSet<MangaReaderBareBone.Models.MangaChapters>? MangaChapters { get; set; }
 

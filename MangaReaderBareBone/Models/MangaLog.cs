@@ -3,11 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MangaReaderBareBone.Models
 {
-    /// <summary>
-    /// Manga Logging Details Table
-    /// Holds information about Manga Chapters Added/Read
-    /// Neccessary to sort latest added/read chapters
-    /// </summary>
     public class MangaLog
     {
         [Key]

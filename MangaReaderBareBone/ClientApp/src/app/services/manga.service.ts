@@ -21,21 +21,21 @@ export class MangaService {
     return this.http.get('/api/Mangas/mangaList/', { responseType: 'text', params: params, }).pipe(map(res => JSON.parse(res)))
   }
 
-  getLatestChapters(numDays: number = 7, numManga: number = 10) {
+  getLatestChapters(numDays: number = 7, numManga: number = 20) {
     let params = new HttpParams();
     params = params.append("numDays", numDays);
     params = params.append("numManga", numManga);
-    return this.http.get('/api/Latest/manga?', { responseType: 'text' }).pipe(map(res => JSON.parse(res)))
+    return this.http.get('/api/Latest/manga?', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)))
   }
 
-  getLastReadMangas(numDays: number = 7, numManga: number = 10) {
+  getLastReadMangas(numDays: number = 7, numManga: number = 20) {
     let params = new HttpParams();
     params = params.append("numDays", numDays);
     params = params.append("numManga", numManga);
-    return this.http.get('/api/Latest/mangaRead?', { responseType: 'text' }).pipe(map(res => JSON.parse(res)))
+    return this.http.get('/api/Latest/mangaRead?', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)))
   }
 
-  reviver(key: string, value: string | number | Date | null): any {
+    reviver(key: string, value: string | number | Date | null): any {
     let elapsed = undefined;
     if (value !== null && (key === 'dateTime')) {
       elapsed = new Date().getTime() - new Date(value).getTime();
@@ -54,6 +54,5 @@ export class MangaService {
     }
     return value;
   }
-
 
 }

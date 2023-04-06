@@ -20,24 +20,21 @@ builder.Services.AddCors(options =>
     });
 });
 var app = builder.Build();
-
 if (!app.Environment.IsDevelopment())
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseDeveloperExceptionPage();
 
 }
-
-app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions()
 {
 #if RELEASE
     FileProvider = new PhysicalFileProvider(
-    Path.Combine("/","mnt","pi"
+    Path.Combine("/", "mnt", "MangaPi"
     ))
 #else
     FileProvider = new PhysicalFileProvider(
-    Path.Combine("\\\\192.168.50.10", "pi"
+    Path.Combine("\\\\192.168.50.11\\Public-Manga"
     ))
 #endif
 });
