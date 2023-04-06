@@ -61,10 +61,16 @@ namespace MangaReaderBareBone.Controllers
                 return NotFound();
             }
             IQueryable<Manga> mangaList = _context.Mangas.OrderBy(e => e.MangaId).Take(max ?? 1);
-            List<MangasDTO> mangaListDTO = new List<MangasDTO>();
-            mangaList.ToList().ForEach(manga => manga.Chapters = GetMangaChapters(manga.MangaId, maxChapters: 1, isReversed: true) ?? new List<MangaChapters>());
-            List<Manga> noEmpty = mangaList.Where(manga => manga.Chapters.Count > 0).OrderBy(e => e.Name).ToList();
-            noEmpty.ForEach(e => mangaListDTO.Add(e.toDTO(getLastReadChapter(e))));
+            var mangaLogsAndChapters = (from m in _context.Mangas
+                                        join mL in _context.MangaLogs! on m.MangaId equals mL.MangaId
+                                        join mC in _context.MangaChapters! on mL.MangaId equals mC.MangaId
+                                        select new
+                                        {
+                                            manga = m.Name,
+                                            status = mL.Status,
+                                            logs = mC.MangaChaptersId,
+                                        }).Where(e=>e.status == "Added").Take(max??1);
+            List<MangasDTO> mangaListDTO = new ();
             return mangaListDTO;
         }
 

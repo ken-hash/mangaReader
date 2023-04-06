@@ -1,6 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
 /* Provide sufficient contrast against white background */
+@charset "utf-8";
+
+@import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
+
+@import "../node_modules/bulma/css/bulma.min.css";
+
+
 a {
   color: #0366d6;
 }
@@ -20,10 +27,3 @@ code {
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
-
-
-@charset "utf-8";
-
-@import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
-
-@import "../node_modules/bulma/bulma.sass";

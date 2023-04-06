@@ -10,7 +10,7 @@
       <h3>Last Read Chapters</h3>
       <ul>
         <li *ngFor='let manga of readManga'><a [routerLink]="['/Manga/',manga.name]">{{manga.name}} </a>- <span *ngFor="let chapter of manga.chapters">
-          <a [routerLink]="['/Manga/',manga.name, chapter.mangaChapter]">{{chapter.mangaChapter}} </a> </span></li>
+          <a [routerLink]="['/Manga/',manga.name, chapter.mangaChapter]" style="text-decoration: none">{{chapter.mangaChapter}} </a> </span></li>
       </ul>
     </div>
   </div>
