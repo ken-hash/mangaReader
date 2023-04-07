@@ -62,7 +62,7 @@ namespace MangaReaderBareBone.Controllers
             {
                 return NotFound();
             }
-            IQueryable<Manga> mangaList = _context.Mangas.OrderBy(e => e.MangaId).Take(max ?? 1);
+            IQueryable<Manga> mangaList = _context.Mangas.OrderBy(e => e.Name).Take(max ?? 1);
                                         
             List<MangasDTO> mangaListDTO = new();
             foreach (var m in mangaList)
