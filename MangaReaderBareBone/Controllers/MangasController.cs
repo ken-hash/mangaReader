@@ -4,6 +4,8 @@ using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Entity;
+using System.Linq;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -61,16 +63,17 @@ namespace MangaReaderBareBone.Controllers
                 return NotFound();
             }
             IQueryable<Manga> mangaList = _context.Mangas.OrderBy(e => e.MangaId).Take(max ?? 1);
-            var mangaLogsAndChapters = (from m in _context.Mangas
-                                        join mL in _context.MangaLogs! on m.MangaId equals mL.MangaId
-                                        join mC in _context.MangaChapters! on mL.MangaId equals mC.MangaId
-                                        select new
-                                        {
-                                            manga = m.Name,
-                                            status = mL.Status,
-                                            logs = mC.MangaChaptersId,
-                                        }).Where(e=>e.status == "Added").Take(max??1);
-            List<MangasDTO> mangaListDTO = new ();
+                                        
+            List<MangasDTO> mangaListDTO = new();
+            foreach (var m in mangaList)
+            {
+                mangaListDTO.Add(new MangasDTO
+                {
+                    MangaName = m.Name,
+                    ChaptersAdded = new List<string?> { getLastAddedChapter(m)?.MangaChapter },
+                    LastChapterRead = getLastReadChapter(m)?.MangaChapter
+                });
+            }
             return mangaListDTO;
         }
 
@@ -84,40 +87,49 @@ namespace MangaReaderBareBone.Controllers
             }
             if (string.IsNullOrEmpty(chapterName))
             {
-                var logsAndChapters = _context.MangaLogs?.Join(_context.MangaChapters!, logs => logs.MangaChaptersId, chapters => chapters.MangaChaptersId, (logs, chapters) => new
-                {
-                    MangaLog = logs,
-                    MangaChapters = chapters
-                }).Where(logsAndChapters => logsAndChapters.MangaLog.Status == "Added" && logsAndChapters.MangaLog.MangaId == mangaId);
-                var arrangedLogsAndChapters = logsAndChapters!.OrderBy(e => e.MangaLog.DateTime);
-                List<MangaChapters>? latestChapterList = null;
-                if (isReversed)
-                {
-                    latestChapterList = arrangedLogsAndChapters.Reverse().Select(e => e.MangaChapters).Take(maxChapters ?? 1).ToList();
-                }
-                else
-                {
-                    latestChapterList = arrangedLogsAndChapters.Select(e => e.MangaChapters).Take(maxChapters ?? 1).ToList();
-                }
+                var logsAndChapters = (from mL in _context.MangaLogs
+                                       join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                       select new
+                                       {
+                                           mangaLogs = mL,
+                                           mangaChapters = mC
+                                       }
+                                       ).Where(e => e.mangaLogs.Status == "Added" && e.mangaLogs.MangaId == mangaId).OrderBy(e=>e.mangaLogs.DateTime);
 
-                return latestChapterList;
+                if (isReversed)
+                    logsAndChapters.Reverse();
+                return logsAndChapters.Select(e => e.mangaChapters).Take(maxChapters ?? 1).ToList();
             }
             else
             {
-                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter.ToLower() == chapterName.ToLower()).OrderBy(e => e.MangaChaptersId).Take(maxChapters ?? 1).ToList();
+                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter!.ToLower() == chapterName.ToLower()).OrderBy(e => e.MangaChaptersId).Take(maxChapters ?? 1).ToList();
             }
         }
 
 
         private MangaChapters? getLastReadChapter(Manga manga)
         {
-            MangaLog? lastReadLog = _context.MangaLogs?.Where(e => e.MangaId == manga!.MangaId && e.Status == "Read").OrderBy(e => e.DateTime).LastOrDefault();
-            MangaChapters? lastReadChapter = null;
-            if (lastReadLog != null)
-            {
-                lastReadChapter = _context.MangaChapters?.FirstOrDefault(e => e.MangaChaptersId == lastReadLog.MangaChaptersId);
-            }
-            return lastReadChapter;
+            var logsAndChapters = (from mL in _context.MangaLogs
+                                   join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                   select new
+                                   {
+                                       mangaLogs = mL,
+                                       mangaChapters = mC
+                                   }
+                                   ).Where(e => e.mangaLogs.Status == "Read" && e.mangaLogs.MangaId == manga.MangaId).OrderBy(e => e.mangaLogs.DateTime).LastOrDefault(); ;
+            return logsAndChapters?.mangaChapters;
+        }
+        private MangaChapters? getLastAddedChapter(Manga manga)
+        {
+            var logsAndChapters = (from mL in _context.MangaLogs
+                                   join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                   select new
+                                   {
+                                       mangaLogs = mL,
+                                       mangaChapters = mC
+                                   }
+                                   ).Where(e => e.mangaLogs.Status == "Added" && e.mangaLogs.MangaId == manga.MangaId).OrderBy(e => e.mangaLogs.DateTime).LastOrDefault();
+            return logsAndChapters?.mangaChapters;
         }
 
         //retrieving mangachapters using mangaid and chaptername
@@ -135,18 +147,21 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(mangaName))
             {
-                manga = await _context.Mangas.FirstOrDefaultAsync(e => e.Name.ToLower() == mangaName.ToLower());
+                manga = _context.Mangas.FirstOrDefault(e => e.Name!.ToLower() == mangaName.ToLower());
             }
             if (manga == null)
             {
                 return NotFound();
             }
             List<MangaChapters>? mangaChapters = string.IsNullOrWhiteSpace(chapterName) ? GetMangaChapters(manga.MangaId, chapterName, 10000) : GetMangaChapters(manga.MangaId, chapterName);
-            var logsAndChapters = _context.MangaLogs?.Join(_context.MangaChapters!, logs => logs.MangaChaptersId, chapters => chapters.MangaChaptersId, (logs, chapters) => new
-            {
-                MangaLog = logs,
-                MangaChapters = chapters
-            }).Where(logsAndChapters => logsAndChapters.MangaLog.Status == "Added" && logsAndChapters.MangaLog.MangaId == manga.MangaId);
+
+            var logsAndChapters = (from mL in _context.MangaLogs
+                                   join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                   select new
+                                   {
+                                       MangaLog = mL,
+                                       MangaChapters = mC
+                                   }).Where(e => e.MangaLog.Status == "Added" && e.MangaLog.MangaId == manga.MangaId);
 
             List<MangaChapters> fullChapterList = logsAndChapters!.ToList().OrderBy(e => e.MangaLog.DateTime).Select(e => e.MangaChapters).ToList();
             if (mangaChapters != null && fullChapterList != null)
