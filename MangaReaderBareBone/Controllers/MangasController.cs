@@ -102,7 +102,7 @@ namespace MangaReaderBareBone.Controllers
             }
             else
             {
-                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter!.ToLower() == chapterName.ToLower()).OrderBy(e => e.MangaChaptersId).Take(maxChapters ?? 1).ToList();
+                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter!.ToLower() == chapterName.ToLower()).ToList();
             }
         }
 
