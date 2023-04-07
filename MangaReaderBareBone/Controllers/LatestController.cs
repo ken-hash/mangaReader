@@ -57,15 +57,7 @@ namespace MangaReaderBareBone.Controllers
                 {
                     continue;
                 }
-                var latest = latestManga.First(e => e.MangaId == manga.Mangas.MangaId);
-                if (latest.Chapters != null)
-                {
-                    latest.Chapters.Add(chapterToAdd);
-                }
-                else
-                {
-                    latest.Chapters = new List<MangaChapters> { chapterToAdd };
-                }
+                latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters?.Add(chapterToAdd);
             }
             return latestManga;
         }
@@ -111,15 +103,7 @@ namespace MangaReaderBareBone.Controllers
                 {
                     continue;
                 }
-                var latest = latestManga.First(e => e.MangaId == manga.Mangas.MangaId);
-                if (latest.Chapters != null)
-                {
-                    latest.Chapters.Add(chapterToAdd);
-                }
-                else
-                {
-                    latest.Chapters = new List<MangaChapters> { chapterToAdd };
-                }
+                latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters?.Add(chapterToAdd);
             }
             return latestManga;
         }
