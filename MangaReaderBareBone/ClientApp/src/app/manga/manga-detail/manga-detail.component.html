@@ -12,6 +12,9 @@
                 ChapterName
               </th>
               <th>
+                Read
+              </th>
+              <th>
                 LastUpdated
               </th>
             </tr>
@@ -19,7 +22,10 @@
           <tbody>
             <tr *ngFor="let chapter of allChapters">
               <td>
-                <a [routerLink]="['/Manga/',manga, chapter.mangaChapters.mangaChapter]">{{chapter.mangaChapters.mangaChapter}} </a>
+                <a [routerLink]="['/Manga/', manga, chapter.mangaChapter]">{{chapter.mangaChapter}} </a>
+              </td>
+              <td>
+                <span *ngIf="chapter.read == true">true</span>
               </td>
               <td width="30%">
                 {{chapter.dateTime}}
