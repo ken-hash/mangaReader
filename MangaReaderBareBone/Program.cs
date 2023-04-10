@@ -41,6 +41,8 @@ app.UseStaticFiles(new StaticFileOptions()
 
 app.UseCors("AllowCORS");
 app.UseHttpsRedirection();
+builder.Services.AddResponseCaching();
+app.UseResponseCaching();
 app.UseRouting();
 app.UseAuthorization();
 app.MapControllerRoute(

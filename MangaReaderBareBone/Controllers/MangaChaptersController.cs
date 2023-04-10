@@ -21,23 +21,6 @@ namespace MangaReaderBareBone.Controllers
             _context = context;
         }
 
-        [HttpGet("chapterId")]
-        public async Task<ActionResult<MangaChapterDTO>> GetMangaChapters(int id)
-        {
-            if (_context.MangaChapters == null)
-            {
-                return NotFound();
-            }
-            MangaChapters? mangaChapter = await _context.MangaChapters.FindAsync(id);
-
-            if (mangaChapter == null)
-            {
-                return NotFound();
-            }
-            List<MangaChapters> fullChapterList = _context.MangaChapters.Where(e => e.MangaId == mangaChapter.MangaId).ToList();
-            return mangaChapter.toDTO(fullChapterList);
-        }
-
         [HttpPost("DeleteChapter/{mangaTitle}/{mangaChapterTitle}")]
         public async Task<IActionResult> DeleteMangaChapter(string mangaTitle, string mangaChapterTitle)
         {
