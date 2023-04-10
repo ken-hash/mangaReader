@@ -56,6 +56,7 @@ namespace MangaReaderBareBone.Controllers
 
         //retrieve mangalist with last added chapter with parameter max number of manga to retrieve
         [HttpGet("mangaList")]
+        [ResponseCache(Duration = 60*10)]
         public ActionResult<List<MangasDTO>> GetMangaList(int? max)
         {
             if (_context.Mangas == null || !max.HasValue || max <= 0)
@@ -172,25 +173,6 @@ namespace MangaReaderBareBone.Controllers
             {
                 return NotFound();
             }
-        }
-
-        //unused for barebone
-        [HttpPut("{id}")]
-        public IActionResult PutManga(int id, Manga manga)
-        {
-            return Problem("Disabled Put");
-        }
-
-        [HttpPost]
-        public ActionResult<Manga> PostManga(Manga manga)
-        {
-            return Problem("Disabled Post");
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult DeleteManga(int id)
-        {
-            return Problem("Disabled Deletion");
         }
 
         [HttpGet("Search")]

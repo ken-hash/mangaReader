@@ -20,54 +20,9 @@ namespace MangaReaderBareBone.Controllers
             _context = context;
         }
 
-
-        [HttpGet("logId")]
-        public async Task<ActionResult<MangaLog>> GetMangaLogByID(int id)
-        {
-            if (_context.MangaLogs == null)
-            {
-                return NotFound();
-            }
-            MangaLog? mangaLog = await _context.MangaLogs.FindAsync(id);
-
-            if (mangaLog == null)
-            {
-                return NotFound();
-            }
-
-            return mangaLog;
-        }
-
-
-        //Retrieving all logs for manga using mangaid
-        [HttpGet("mangaId")]
-        public async Task<ActionResult<List<MangaLog>>> GetMangaLogByMangaID(int id, string? sort = "asc")
-        {
-            if (_context.MangaLogs == null || _context.MangaChapters == null)
-            {
-                return NotFound();
-            }
-            Manga? manga = await _context.Mangas.FindAsync(id);
-            if (manga != null)
-            {
-                IQueryable<MangaLog> mangaLog = _context.MangaLogs.Where(log => manga.MangaId == log.MangaId && log.Status == "Added").OrderBy(e => e.DateTime); ;
-                if (mangaLog == null)
-                {
-                    return NotFound();
-                }
-                mangaLog.ToList().ForEach(e => e.MangaChapters = _context.MangaChapters.First(f => f.MangaChaptersId == e.MangaChaptersId));
-                if (sort?.ToLower() == "desc")
-                {
-                    return mangaLog.ToList().OrderBy(e => e.DateTime).Reverse().ToList();
-                }
-                return mangaLog.ToList();
-            }
-            return NotFound();
-        }
-
-
         //Retrieving all logs for manga using manga name with sort as second parameter
         [HttpGet("mangaName")]
+        [ResponseCache(Duration = 60 * 5)]
         public async Task<ActionResult<List<MangaDetailsDTO>>> GetMangaLogByMangaNameAsync(string? mangaName, string? sort = "asc")
         {
             if (_context.MangaLogs == null || string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null || _context.Mangas == null)
