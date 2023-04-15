@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Entity;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -44,7 +45,7 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(name))
             {
-                manga = _context.Mangas.FirstOrDefault(e => e.Name.ToLower() == name.ToLower());
+                manga = _context.Mangas.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
                 if (manga == null)
                 {
                     return NotFound();
@@ -90,20 +91,21 @@ namespace MangaReaderBareBone.Controllers
             {
                 var logsAndChapters = (from mL in _context.MangaLogs
                                        join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                       where mL.Status == "Added" && mL.MangaId == mangaId
+                                       orderby mL.DateTime
                                        select new
                                        {
                                            mangaLogs = mL,
                                            mangaChapters = mC
                                        }
-                                       ).Where(e => e.mangaLogs.Status == "Added" && e.mangaLogs.MangaId == mangaId).OrderBy(e=>e.mangaLogs.DateTime);
-
+                                       );
                 if (isReversed)
                     logsAndChapters.Reverse();
                 return logsAndChapters.Select(e => e.mangaChapters).Take(maxChapters ?? 1).ToList();
             }
             else
             {
-                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && e.MangaChapter!.ToLower() == chapterName.ToLower()).ToList();
+                return _context.MangaChapters?.Where(e => e.MangaId == mangaId && string.Equals(e.MangaChapter, chapterName, StringComparison.OrdinalIgnoreCase)).ToList();
             }
         }
 
@@ -112,26 +114,28 @@ namespace MangaReaderBareBone.Controllers
         {
             var logsAndChapters = (from mL in _context.MangaLogs
                                    join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                   where mL.Status == "Read" && mL.MangaId == manga.MangaId
                                    orderby mL.DateTime descending
                                    select new
                                    {
                                        mangaLogs = mL,
                                        mangaChapters = mC
                                    }
-                                   ).Where(e => e.mangaLogs.Status == "Read" && e.mangaLogs.MangaId == manga.MangaId).Take(1).FirstOrDefault();
+                                   ).Take(1).FirstOrDefault();
             return logsAndChapters?.mangaChapters;
         }
         private MangaChapters? getLastAddedChapter(Manga manga)
         {
             var logsAndChapters = (from mL in _context.MangaLogs
                                    join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                   where mL.Status == "Added" && mL.MangaId == manga.MangaId
                                    orderby mL.DateTime descending
                                    select new
                                    {
                                        mangaLogs = mL,
                                        mangaChapters = mC
                                    }
-                                   ).Where(e => e.mangaLogs.Status == "Added" && e.mangaLogs.MangaId == manga.MangaId).Take(1).FirstOrDefault();
+                                   ).Take(1).FirstOrDefault();
             return logsAndChapters?.mangaChapters;
         }
 
@@ -150,7 +154,7 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(mangaName))
             {
-                manga = _context.Mangas.FirstOrDefault(e => e.Name!.ToLower() == mangaName.ToLower());
+                manga = _context.Mangas.FirstOrDefault(e => string.Equals(e.Name, mangaName, StringComparison.OrdinalIgnoreCase));
             }
             if (manga == null)
             {
@@ -160,11 +164,12 @@ namespace MangaReaderBareBone.Controllers
 
             var logsAndChapters = (from mL in _context.MangaLogs
                                    join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                   where mL.Status == "Added" && mL.MangaId == manga.MangaId
                                    select new
                                    {
                                        MangaLog = mL,
                                        MangaChapters = mC
-                                   }).Where(e => e.MangaLog.Status == "Added" && e.MangaLog.MangaId == manga.MangaId);
+                                   });
 
             List<MangaChapters> fullChapterList = logsAndChapters!.ToList().OrderBy(e => e.MangaLog.DateTime).Select(e => e.MangaChapters).ToList();
             if (mangaChapters != null && fullChapterList != null)
@@ -199,7 +204,7 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(name))
             {
-                List<Manga> searchResults = _context.Mangas.Where(e => e.Name.ToLower().Contains(name.ToLower())).ToList();
+                List<Manga> searchResults = _context.Mangas.Where(e=>string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase)).ToList();
                 if (searchResults == null)
                 {
                     return NotFound();
