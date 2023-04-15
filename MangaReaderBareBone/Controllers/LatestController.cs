@@ -2,7 +2,6 @@
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,12 +24,10 @@ namespace MangaReaderBareBone.Controllers
         public async Task<ActionResult<List<Manga>>> GetLatestChapters(int? numDays = 3, int? numManga = 10)
         {
             if (_context.Mangas == null)
-            if (_context.Mangas == null)
             {
                 return NotFound();
             }
             List<Manga> latestManga = new ();
-            var addedMangaInDays = await GetLatestManga(numDays, numManga, "Added");
             var addedMangaInDays = await GetLatestManga(numDays, numManga, "Added");
 
             foreach (var manga in addedMangaInDays)
@@ -40,13 +37,10 @@ namespace MangaReaderBareBone.Controllers
                     break;
                 }
                 if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
-                if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
                 {
                     latestManga.Add(manga?.Mangas!);
-                    latestManga.Add(manga?.Mangas!);
                 }
-                if (latestManga.FirstOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
-                if (latestManga.FirstOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
+                if (latestManga.SingleOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
                 {
                     continue;
                 }
@@ -61,12 +55,10 @@ namespace MangaReaderBareBone.Controllers
         public async Task<ActionResult<List<Manga>>> GetLastReadChapters(int? numDays = 7, int? numManga = 10)
         {
             if (_context.Mangas == null)
-            if (_context.Mangas == null)
             {
                 return NotFound();
             }
             List<Manga> latestManga = new();
-            var addedMangaInDays = await GetLatestManga(numDays, numManga, "Read");
             var addedMangaInDays = await GetLatestManga(numDays, numManga, "Read");
 
             foreach (var manga in addedMangaInDays)
@@ -76,13 +68,10 @@ namespace MangaReaderBareBone.Controllers
                     break;
                 }
                 if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
-                if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
                 {
                     latestManga.Add(manga?.Mangas!);
-                    latestManga.Add(manga?.Mangas!);
                 }
-                if (latestManga.FirstOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
-                if (latestManga.FirstOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
+                if (latestManga.SingleOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
                 {
                     continue;
                 }

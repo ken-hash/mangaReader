@@ -29,10 +29,10 @@ namespace MangaReaderBareBone.Controllers
             {
                 return NotFound();
             }
-            Manga? manga = await _context.Mangas.FirstOrDefaultAsync(manga => manga.Name!.ToLower() == mangaName.ToLower());
+            Manga? manga = await _context.Mangas.SingleOrDefaultAsync(m => string.Equals(m.Name, mangaName));
             if (manga != null)
             {
-                var mangaLogAndChapters = (from mL in _context.MangaLogs
+                var mangaLogAndChapters = await (from mL in _context.MangaLogs
                                            join mC in _context.MangaChapters on mL.MangaChaptersId equals mC.MangaChaptersId
                                            join m in _context.Mangas on mC.MangaId equals m.MangaId
                                            orderby mL.DateTime 
@@ -44,8 +44,8 @@ namespace MangaReaderBareBone.Controllers
                                                chapterId = mC.MangaChaptersId,
                                                dateTime = mL.DateTime,
                                            }
-                                           ).Where(e => e.manga == mangaName && e.status == "Added");
-                var mangaLogAndChaptersRead = (from mC in _context.MangaChapters
+                                           ).Where(e => e.manga == mangaName && e.status == "Added").ToListAsync();
+                var mangaLogAndChaptersRead = await (from mC in _context.MangaChapters
                                            join mL in _context.MangaLogs on mC.MangaChaptersId equals mL.MangaChaptersId into tempLogs
                                            from temp in tempLogs.DefaultIfEmpty()
                                            join m in _context.Mangas on mC.MangaId equals m.MangaId
@@ -57,7 +57,7 @@ namespace MangaReaderBareBone.Controllers
                                                chapterId = mC.MangaChaptersId,
                                                dateTime = temp.DateTime,
                                            }
-                                           ).Where(e => e.manga == mangaName && e.status == "Read");
+                                           ).Where(e => e.manga == mangaName && e.status == "Read").ToListAsync();
                 if (sort?.ToLower() == "desc")
                     mangaLogAndChapters.Reverse();
                 List<MangaDetailsDTO> mangaDetails= new ();
@@ -90,24 +90,26 @@ namespace MangaReaderBareBone.Controllers
             {
                 return BadRequest("Invalid Request");
             }
-            int? mangaId = _context.Mangas.FirstOrDefault(e => e.Name.ToLower() == log.MangaName.ToLower())?.MangaId;
+            var manga = await _context.Mangas.SingleOrDefaultAsync(m => string.Equals(m.Name, log.MangaName));
+            int? mangaId = manga?.MangaId;
             if (mangaId == null)
             {
                 return BadRequest("invalid manga");
             }
-            int? chapterId = _context.MangaChapters?.FirstOrDefault(e => e.MangaId == mangaId && e.MangaChapter.ToLower() == log.ChapterName.ToLower())?.MangaChaptersId;
+            var chapter = await _context.MangaChapters!.SingleOrDefaultAsync(e => e.MangaId == mangaId && string.Equals(e.MangaChapter, log.ChapterName));
+            int? chapterId = chapter?.MangaChaptersId;
             if (chapterId == null)
             {
                 return BadRequest("invalid chapter");
             }
-            MangaLog? mangaLog = _context.MangaLogs.FirstOrDefault(e => e.MangaChaptersId == chapterId && e.MangaId == mangaId && e.Status == "Read");
+            MangaLog? mangaLog = await _context.MangaLogs.SingleOrDefaultAsync(e => e.MangaChaptersId == chapterId && e.MangaId == mangaId && e.Status == "Read");
             if (mangaLog != null)
             {
                 mangaLog.DateTime = DateTime.Now;
                 await _context.SaveChangesAsync();
                 return Ok("Saved");
             }
-            MangaLog newLog = new MangaLog
+            MangaLog newLog = new ()
             {
                 Status = log.Status,
                 MangaId = mangaId!,
