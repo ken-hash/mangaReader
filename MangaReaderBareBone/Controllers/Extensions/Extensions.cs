@@ -17,7 +17,7 @@ namespace MangaReaderBareBone.Controllers.Extensions
 
         public static MangasDTO toDTO(this Manga manga, MangaChapters? lastRead)
         {
-            MangasDTO mangaDTO = new MangasDTO
+            MangasDTO mangaDTO = new ()
             {
                 MangaName = manga.Name,
                 ChaptersAdded = manga.Chapters?.toChapterList(),
@@ -28,7 +28,7 @@ namespace MangaReaderBareBone.Controllers.Extensions
 
         public static MangaChapterDTO toDTO(this MangaChapters chapter, IEnumerable<MangaChapters> fullChapterList)
         {
-            MangaChapterDTO mangaChapterDTO = new MangaChapterDTO
+            MangaChapterDTO mangaChapterDTO = new ()
             {
                 MangaChapter = chapter.MangaChapter,
                 Path = chapter.Path,
@@ -56,7 +56,7 @@ namespace MangaReaderBareBone.Controllers.Extensions
 
         public static List<MangaChapterDTO> toDTOList(this List<MangaChapters> chapterList, IEnumerable<MangaChapters> fullChapterList)
         {
-            List<MangaChapterDTO> mangaChapterDTOList = new List<MangaChapterDTO>();
+            List<MangaChapterDTO> mangaChapterDTOList = new ();
             foreach (MangaChapters chapter in chapterList)
             {
                 mangaChapterDTOList.Add(chapter.toDTO(fullChapterList));
@@ -67,7 +67,7 @@ namespace MangaReaderBareBone.Controllers.Extensions
 
         public static List<string?> toChapterList(this IEnumerable<MangaChapters> chapterList)
         {
-            List<string?> result = new List<string?>();
+            List<string?> result = new ();
             foreach (MangaChapters chapter in chapterList)
             {
                 result.Add(chapter.MangaChapter);
