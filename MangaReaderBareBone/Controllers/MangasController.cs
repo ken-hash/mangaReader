@@ -112,24 +112,26 @@ namespace MangaReaderBareBone.Controllers
         {
             var logsAndChapters = (from mL in _context.MangaLogs
                                    join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                   orderby mL.DateTime descending
                                    select new
                                    {
                                        mangaLogs = mL,
                                        mangaChapters = mC
                                    }
-                                   ).Where(e => e.mangaLogs.Status == "Read" && e.mangaLogs.MangaId == manga.MangaId).OrderBy(e => e.mangaLogs.DateTime).LastOrDefault(); ;
+                                   ).Where(e => e.mangaLogs.Status == "Read" && e.mangaLogs.MangaId == manga.MangaId).Take(1).FirstOrDefault();
             return logsAndChapters?.mangaChapters;
         }
         private MangaChapters? getLastAddedChapter(Manga manga)
         {
             var logsAndChapters = (from mL in _context.MangaLogs
                                    join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                   orderby mL.DateTime descending
                                    select new
                                    {
                                        mangaLogs = mL,
                                        mangaChapters = mC
                                    }
-                                   ).Where(e => e.mangaLogs.Status == "Added" && e.mangaLogs.MangaId == manga.MangaId).OrderBy(e => e.mangaLogs.DateTime).LastOrDefault();
+                                   ).Where(e => e.mangaLogs.Status == "Added" && e.mangaLogs.MangaId == manga.MangaId).Take(1).FirstOrDefault();
             return logsAndChapters?.mangaChapters;
         }
 

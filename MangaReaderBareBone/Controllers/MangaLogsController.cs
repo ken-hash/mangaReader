@@ -22,7 +22,7 @@ namespace MangaReaderBareBone.Controllers
 
         //Retrieving all logs for manga using manga name with sort as second parameter
         [HttpGet("mangaName")]
-        [ResponseCache(Duration = 60 * 5)]
+        [ResponseCache(Duration = 60 * 5, VaryByQueryKeys = new[] { "mangaName" })]
         public async Task<ActionResult<List<MangaDetailsDTO>>> GetMangaLogByMangaNameAsync(string? mangaName, string? sort = "asc")
         {
             if (_context.MangaLogs == null || string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null || _context.Mangas == null)
@@ -35,6 +35,7 @@ namespace MangaReaderBareBone.Controllers
                 var mangaLogAndChapters = (from mL in _context.MangaLogs
                                            join mC in _context.MangaChapters on mL.MangaChaptersId equals mC.MangaChaptersId
                                            join m in _context.Mangas on mC.MangaId equals m.MangaId
+                                           orderby mL.DateTime 
                                            select new
                                            {
                                                manga = m.Name,
@@ -43,15 +44,28 @@ namespace MangaReaderBareBone.Controllers
                                                chapterId = mC.MangaChaptersId,
                                                dateTime = mL.DateTime,
                                            }
-                                           ).Where(e => e.manga == mangaName).OrderBy(e => e.dateTime);
+                                           ).Where(e => e.manga == mangaName && e.status == "Added");
+                var mangaLogAndChaptersRead = (from mC in _context.MangaChapters
+                                           join mL in _context.MangaLogs on mC.MangaChaptersId equals mL.MangaChaptersId into tempLogs
+                                           from temp in tempLogs.DefaultIfEmpty()
+                                           join m in _context.Mangas on mC.MangaId equals m.MangaId
+                                           select new
+                                           {
+                                               manga = m.Name,
+                                               status = temp.Status == "Read" ? "Read" : string.Empty,
+                                               chapter = mC.MangaChapter,
+                                               chapterId = mC.MangaChaptersId,
+                                               dateTime = temp.DateTime,
+                                           }
+                                           ).Where(e => e.manga == mangaName && e.status == "Read");
                 if (sort?.ToLower() == "desc")
                     mangaLogAndChapters.Reverse();
                 List<MangaDetailsDTO> mangaDetails= new ();
-                foreach (var m in mangaLogAndChapters.Where(e=>e.status=="Added"))
+                foreach (var m in mangaLogAndChapters)
                 {
                     mangaDetails.Add(new MangaDetailsDTO
                     {
-                        read = mangaLogAndChapters.Any(e=>e.status=="Read" && e.chapter==m.chapter),
+                        read = mangaLogAndChaptersRead.Where(e => e.chapterId == m.chapterId).FirstOrDefault()?.status == "Read",
                         mangaChapter = m.chapter,
                         dateTime = m.dateTime
                     });
