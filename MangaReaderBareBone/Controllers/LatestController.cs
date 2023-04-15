@@ -1,6 +1,8 @@
 ﻿using MangaReaderBareBone.Data;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,20 +24,14 @@ namespace MangaReaderBareBone.Controllers
         [ResponseCache(Duration = 60 * 5)]
         public async Task<ActionResult<List<Manga>>> GetLatestChapters(int? numDays = 3, int? numManga = 10)
         {
-            if (_context.Mangas == null || _context.MangaLogs == null || _context.MangaChapters == null)
+            if (_context.Mangas == null)
+            if (_context.Mangas == null)
             {
                 return NotFound();
             }
             List<Manga> latestManga = new ();
-            var addedMangaInDays = (from m in _context.Mangas
-                                    join mL in _context.MangaLogs on m.MangaId equals mL.MangaId
-                                    join mC in _context.MangaChapters on mL.MangaChaptersId equals mC.MangaChaptersId
-                                    select new
-                                    {
-                                        Mangas = m,
-                                        MangaLogs = mL,
-                                        MangaChapters = mC
-                                    }).Where(e => e.MangaLogs.Status == "Added" && e.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays!)).OrderBy(e => e.MangaLogs.DateTime).Reverse();
+            var addedMangaInDays = await GetLatestManga(numDays, numManga, "Added");
+            var addedMangaInDays = await GetLatestManga(numDays, numManga, "Added");
 
             foreach (var manga in addedMangaInDays)
             {
@@ -43,11 +39,14 @@ namespace MangaReaderBareBone.Controllers
                 {
                     break;
                 }
-                if (!latestManga.Any(e => e.MangaId == manga.Mangas.MangaId))
+                if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
+                if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
                 {
-                    latestManga.Add(manga.Mangas);
+                    latestManga.Add(manga?.Mangas!);
+                    latestManga.Add(manga?.Mangas!);
                 }
-                if (latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters?.Count >= 10)
+                if (latestManga.FirstOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
+                if (latestManga.FirstOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
                 {
                     continue;
                 }
@@ -61,20 +60,14 @@ namespace MangaReaderBareBone.Controllers
         [ResponseCache(Duration = 60 * 5)]
         public async Task<ActionResult<List<Manga>>> GetLastReadChapters(int? numDays = 7, int? numManga = 10)
         {
-            if (_context.Mangas == null || _context.MangaLogs == null || _context.MangaChapters == null)
+            if (_context.Mangas == null)
+            if (_context.Mangas == null)
             {
                 return NotFound();
             }
             List<Manga> latestManga = new();
-            var addedMangaInDays = (from m in _context.Mangas
-                                    join mL in _context.MangaLogs on m.MangaId equals mL.MangaId
-                                    join mC in _context.MangaChapters on mL.MangaChaptersId equals mC.MangaChaptersId
-                                    select new
-                                    {
-                                        Mangas = m,
-                                        MangaLogs = mL,
-                                        MangaChapters = mC
-                                    }).Where(e => e.MangaLogs.Status == "Read" && e.MangaLogs.DateTime > DateTime.Now.AddDays(-(double)numDays!)).OrderBy(e => e.MangaLogs.DateTime).Reverse();
+            var addedMangaInDays = await GetLatestManga(numDays, numManga, "Read");
+            var addedMangaInDays = await GetLatestManga(numDays, numManga, "Read");
 
             foreach (var manga in addedMangaInDays)
             {
@@ -82,16 +75,41 @@ namespace MangaReaderBareBone.Controllers
                 {
                     break;
                 }
-                if (!latestManga.Any(e => e.MangaId == manga.Mangas.MangaId))
+                if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
+                if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
                 {
-                    latestManga.Add(manga.Mangas);
+                    latestManga.Add(manga?.Mangas!);
+                    latestManga.Add(manga?.Mangas!);
                 }
-                if (latestManga.FirstOrDefault(e => e.MangaId == manga.Mangas.MangaId)?.Chapters?.Count >= 10)
+                if (latestManga.FirstOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
+                if (latestManga.FirstOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
                 {
                     continue;
                 }
             }
             return latestManga;
+        }
+
+        private async Task<List<TempManga>> GetLatestManga(int? numDays = 7, int? numManga = 10, string? status="Added")
+        {
+            var latestManga = await (from m in _context.Mangas
+                                          join mL in _context.MangaLogs! on m.MangaId equals mL.MangaId
+                                          join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                          where mL.Status == status && mL.DateTime > DateTime.Now.AddDays(-(double)numDays!)
+                                          orderby mL.DateTime descending
+                                          select new TempManga
+                                          {
+                                              Mangas = m,
+                                              MangaLogs = mL,
+                                              MangaChapters = mC
+                                          }).ToListAsync();
+            return latestManga!;
+        }
+        private class TempManga
+        {
+            public Manga? Mangas { get; set; }
+            public MangaLog? MangaLogs { get; set; }
+            public MangaChapters? MangaChapters { get; set; }
         }
     }
 }
