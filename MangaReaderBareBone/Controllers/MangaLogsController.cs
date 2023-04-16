@@ -22,7 +22,7 @@ namespace MangaReaderBareBone.Controllers
 
         //Retrieving all logs for manga using manga name with sort as second parameter
         [HttpGet("mangaName")]
-        [ResponseCache(Duration = 60 * 5, VaryByQueryKeys = new[] { "mangaName" })]
+        [ResponseCache(Duration = 60 * 2, VaryByQueryKeys = new[] { "mangaName" })]
         public async Task<ActionResult<List<MangaDetailsDTO>>> GetMangaLogByMangaNameAsync(string? mangaName, string? sort = "asc")
         {
             if (_context.MangaLogs == null || string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null || _context.Mangas == null)
