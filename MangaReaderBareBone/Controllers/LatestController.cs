@@ -20,7 +20,7 @@ namespace MangaReaderBareBone.Controllers
 
         // Get latest number of numManga mangas and chapters(max 10) added in the last past numdays
         [HttpGet("manga")]
-        [ResponseCache(Duration = 60 * 5)]
+        [ResponseCache(Duration = 60 * 1)]
         public async Task<ActionResult<List<Manga>>> GetLatestChapters(int? numDays = 3, int? numManga = 10)
         {
             if (_context.Mangas == null)
@@ -51,7 +51,7 @@ namespace MangaReaderBareBone.Controllers
 
         // Get latest number of numManga mangas read and chapters(max 10) in the last past numdays
         [HttpGet("mangaRead")]
-        [ResponseCache(Duration = 60 * 5)]
+        [ResponseCache(Duration = 60 * 1)]
         public async Task<ActionResult<List<Manga>>> GetLastReadChapters(int? numDays = 7, int? numManga = 10)
         {
             if (_context.Mangas == null)
