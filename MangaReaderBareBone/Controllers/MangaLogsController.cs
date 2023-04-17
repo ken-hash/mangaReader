@@ -33,39 +33,41 @@ namespace MangaReaderBareBone.Controllers
             if (manga != null)
             {
                 var mangaLogAndChapters = await (from mL in _context.MangaLogs
-                                           join mC in _context.MangaChapters on mL.MangaChaptersId equals mC.MangaChaptersId
-                                           join m in _context.Mangas on mC.MangaId equals m.MangaId
-                                           orderby mL.DateTime 
-                                           select new
-                                           {
-                                               manga = m.Name,
-                                               status = mL.Status,
-                                               chapter = mC.MangaChapter,
-                                               chapterId = mC.MangaChaptersId,
-                                               dateTime = mL.DateTime,
-                                           }
-                                           ).Where(e => e.manga == mangaName && e.status == "Added").ToListAsync();
+                                                 join mC in _context.MangaChapters on mL.MangaChaptersId equals mC.MangaChaptersId
+                                                 join m in _context.Mangas on mC.MangaId equals m.MangaId
+                                                 where string.Equals(m.Name, mangaName) && mL.Status == "Added"
+                                                 orderby mL.DateTime
+                                                 select new
+                                                 {
+                                                     mangaId = m.MangaId,
+                                                     manga = m.Name,
+                                                     chapter = mC.MangaChapter,
+                                                     chapterId = mC.MangaChaptersId,
+                                                     dateTime = mL.DateTime,
+                                                 }
+                                           ).ToListAsync();
                 var mangaLogAndChaptersRead = await (from mC in _context.MangaChapters
-                                           join mL in _context.MangaLogs on mC.MangaChaptersId equals mL.MangaChaptersId into tempLogs
-                                           from temp in tempLogs.DefaultIfEmpty()
-                                           join m in _context.Mangas on mC.MangaId equals m.MangaId
-                                           select new
-                                           {
-                                               manga = m.Name,
-                                               status = temp.Status == "Read" ? "Read" : string.Empty,
-                                               chapter = mC.MangaChapter,
-                                               chapterId = mC.MangaChaptersId,
-                                               dateTime = temp.DateTime,
-                                           }
-                                           ).Where(e => e.manga == mangaName && e.status == "Read").ToListAsync();
+                                                     join mL in _context.MangaLogs on mC.MangaChaptersId equals mL.MangaChaptersId into tempLogs
+                                                     from temp in tempLogs.DefaultIfEmpty()
+                                                     join m in _context.Mangas on mC.MangaId equals m.MangaId
+                                                     where temp.Status == "Read" && string.Equals(m.Name, mangaName)
+                                                     select new
+                                                     {
+                                                         manga = m.Name,
+                                                         status = temp.Status,
+                                                         chapter = mC.MangaChapter,
+                                                         chapterId = mC.MangaChaptersId,
+                                                         dateTime = temp.DateTime,
+                                                     }
+                                           ).ToListAsync();
                 if (sort?.ToLower() == "desc")
                     mangaLogAndChapters.Reverse();
-                List<MangaDetailsDTO> mangaDetails= new ();
+                List<MangaDetailsDTO> mangaDetails = new();
                 foreach (var m in mangaLogAndChapters)
                 {
                     mangaDetails.Add(new MangaDetailsDTO
                     {
-                        read = mangaLogAndChaptersRead.Where(e => e.chapterId == m.chapterId).FirstOrDefault()?.status == "Read",
+                        read = mangaLogAndChaptersRead.Any(e=>e.chapterId == m.chapterId),
                         mangaChapter = m.chapter,
                         dateTime = m.dateTime
                     });
@@ -79,29 +81,19 @@ namespace MangaReaderBareBone.Controllers
         public async Task<ActionResult<MangaLogDTO>> PostMangaLogAsync([FromBody] MangaLogDTO log)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
             if (_context.MangaLogs == null)
-            {
                 return Problem("Can't connect to database");
-            }
             if (string.IsNullOrWhiteSpace(log.MangaName) || string.IsNullOrEmpty(log.ChapterName))
-            {
                 return BadRequest("Invalid Request");
-            }
-            var manga = await _context.Mangas.SingleOrDefaultAsync(m => string.Equals(m.Name, log.MangaName));
+            Manga? manga = await _context.Mangas.SingleOrDefaultAsync(m => string.Equals(m.Name, log.MangaName));
             int? mangaId = manga?.MangaId;
             if (mangaId == null)
-            {
                 return BadRequest("invalid manga");
-            }
-            var chapter = await _context.MangaChapters!.SingleOrDefaultAsync(e => e.MangaId == mangaId && string.Equals(e.MangaChapter, log.ChapterName));
+            MangaChapters? chapter = await _context.MangaChapters!.SingleOrDefaultAsync(e => e.MangaId == mangaId && string.Equals(e.MangaChapter, log.ChapterName));
             int? chapterId = chapter?.MangaChaptersId;
             if (chapterId == null)
-            {
                 return BadRequest("invalid chapter");
-            }
             MangaLog? mangaLog = await _context.MangaLogs.SingleOrDefaultAsync(e => e.MangaChaptersId == chapterId && e.MangaId == mangaId && e.Status == "Read");
             if (mangaLog != null)
             {
@@ -109,7 +101,7 @@ namespace MangaReaderBareBone.Controllers
                 await _context.SaveChangesAsync();
                 return Ok("Saved");
             }
-            MangaLog newLog = new ()
+            MangaLog newLog = new()
             {
                 Status = log.Status,
                 MangaId = mangaId!,

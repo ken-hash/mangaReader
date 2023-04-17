@@ -285,3 +285,4 @@ testem.log
 Thumbs.db
 
 */ClientApp/.angular/*
+*/.vscode/*
