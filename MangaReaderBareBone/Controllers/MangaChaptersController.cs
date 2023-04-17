@@ -1,6 +1,5 @@
 ﻿using MangaReaderBareBone.Controllers.Extensions;
 using MangaReaderBareBone.Data;
-using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,21 +24,15 @@ namespace MangaReaderBareBone.Controllers
         public async Task<IActionResult> DeleteMangaChapter(string mangaTitle, string mangaChapterTitle)
         {
             if (_context.MangaChapters == null)
-            {
                 return NotFound();
-            }
             Manga? manga = await _context.Mangas.SingleOrDefaultAsync(e => e.Name == mangaTitle);
             if (manga == null)
-            {
                 return NotFound();
-            }
             MangaChapters? mangaChapter = await _context.MangaChapters.SingleOrDefaultAsync(e => e.MangaId == manga.MangaId && e.MangaChapter == mangaChapterTitle);
             if (mangaChapter == null)
-            {
                 return NotFound();
-            }
             List<MangaLog> mangaLog = await _context.MangaLogs!.Where(e => e.MangaChaptersId == mangaChapter.MangaChaptersId).ToListAsync();
-            foreach (var log in mangaLog)
+            foreach (MangaLog log in mangaLog)
             {
                 _context.MangaLogs!.Remove(log);
             }
@@ -53,29 +46,25 @@ namespace MangaReaderBareBone.Controllers
         public async Task<IActionResult> AddMangaChapter([FromBody] piMangaChapter piMangaChapter)
         {
             if (!ModelState.IsValid || piMangaChapter == null)
-            {
                 return BadRequest(ModelState);
-            }
             if (_context.MangaChapters == null)
-            {
                 return NotFound();
-            }
             Manga? manga = await _context.Mangas.SingleOrDefaultAsync(e => e.Name == piMangaChapter.Name);
             if (manga == null)
             {
-                Manga newManga = new ()
+                Manga newManga = new()
                 {
                     Name = piMangaChapter.Name,
                 };
                 await _context.Mangas.AddAsync(newManga);
-                manga=newManga;
+                manga = newManga;
                 await _context.SaveChangesAsync();
             }
 
             MangaChapters? mangaChapter = await _context.MangaChapters.SingleOrDefaultAsync(e => e.MangaId == manga.MangaId && e.MangaChapter == piMangaChapter.MangaChapter);
             if (mangaChapter == null)
             {
-                MangaChapters newChapter = new ()
+                MangaChapters newChapter = new()
                 {
                     MangaId = manga.MangaId,
                     MangaChapter = piMangaChapter.MangaChapter,
@@ -83,7 +72,7 @@ namespace MangaReaderBareBone.Controllers
                 };
                 await _context.MangaChapters.AddAsync(newChapter);
                 await _context.SaveChangesAsync();
-                MangaLog newLog = new ()
+                MangaLog newLog = new()
                 {
                     MangaId = manga.MangaId,
                     Status = "Added",
