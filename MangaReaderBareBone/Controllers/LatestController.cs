@@ -38,7 +38,7 @@ namespace MangaReaderBareBone.Controllers
             return await GetLatestManga(numDays, numManga, "Read");
         }
 
-        private async Task<List<Manga>> GetLatestManga(int? numDays = 7, int? numManga = 10, string? status = "Added")
+        private async Task<List<Manga>> GetLatestManga(int? numDays = 7, int? numManga = 10, string? status = "Added", int? maxNumChapters = 10)
         {
             List<TempManga> updatedManga = await (from m in _context.Mangas
                                                  join mL in _context.MangaLogs! on m.MangaId equals mL.MangaId
@@ -48,7 +48,6 @@ namespace MangaReaderBareBone.Controllers
                                                  select new TempManga
                                                  {
                                                      Mangas = m,
-                                                     MangaLogs = mL,
                                                      MangaChapters = mC
                                                  }).ToListAsync();
             List<Manga> latestManga = new();
@@ -56,9 +55,19 @@ namespace MangaReaderBareBone.Controllers
             {
                 if (latestManga.Count >= numManga)
                     break;
-                if (!latestManga.Any(e => e.MangaId == manga?.Mangas!.MangaId))
-                    latestManga.Add(manga?.Mangas!);
-                if (latestManga.SingleOrDefault(e => e.MangaId == manga?.Mangas!.MangaId)?.Chapters?.Count >= 10)
+                if (!latestManga.Any(e => e.MangaId == manga?.Mangas?.MangaId))
+                {
+                    int chapterCount = manga?.Mangas?.Chapters?.Count ?? 0;
+                    if (chapterCount >= maxNumChapters)
+                    {
+                        var maxChapters = manga?.Mangas?.Chapters?.Take(maxNumChapters??10).ToList();
+                        manga!.Mangas!.Chapters = maxChapters;
+                        latestManga.Add(manga!.Mangas!);
+                    }
+                    else
+                        latestManga.Add(manga!.Mangas!);
+                }
+                if (latestManga.SingleOrDefault(e => e.MangaId == manga?.Mangas?.MangaId)?.Chapters?.Count >= numManga)
                     continue;
             }
             return latestManga;
