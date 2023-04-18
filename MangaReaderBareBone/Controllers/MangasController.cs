@@ -53,14 +53,14 @@ namespace MangaReaderBareBone.Controllers
         {
             if (_context.Mangas == null || !max.HasValue || max <= 0)
                 return NotFound();
-            var queryList = await _context.MangaLogs!
+            var queryListAdded = await _context.MangaLogs!
                 .Where(mL => mL.Status == "Added")
                 .GroupBy(mL => new { mL.MangaId })
                 .Select(g => new { g.Key.MangaId, MaxDateTime = g.Max(mL => mL.DateTime) })
                 .OrderBy(e => e.MangaId)
                 .Distinct()
                 .ToListAsync();
-            var mangaList = queryList.Select(x => new { x.MangaId, x.MaxDateTime })
+            var mangaList = queryListAdded.Select(x => new { x.MangaId, x.MaxDateTime })
                 .Join(_context.MangaLogs!,
                     x => new { x.MangaId, x.MaxDateTime },
                     m => new { m.MangaId, MaxDateTime = m.DateTime },
@@ -75,15 +75,32 @@ namespace MangaReaderBareBone.Controllers
                     (x, c) => new { x.Name, c.MangaChapter, x.MaxDateTime, x.MangaId })
                 .ToList().OrderBy(e => e.Name);
 
+            var queryListRead = await _context.MangaLogs!
+                .Where(mL => mL.Status == "Read")
+                .GroupBy(mL => new { mL.MangaId })
+                .Select(g => new { g.Key.MangaId, MaxDateTime = g.Max(mL => mL.DateTime) })
+                .OrderBy(e => e.MangaId)
+                .Distinct()
+                .ToListAsync();
+            var mangaListRead = queryListRead.Select(x => new { x.MangaId, x.MaxDateTime })
+                .Join(_context.MangaLogs!,
+                    x => new { x.MangaId, x.MaxDateTime },
+                    m => new { m.MangaId, MaxDateTime = m.DateTime },
+                    (x, m) => new { x.MaxDateTime, x.MangaId, m.MangaChaptersId })
+                .Join(_context.MangaChapters!,
+                    x => x.MangaChaptersId,
+                    c => c.MangaChaptersId,
+                    (x, c) => new {c.MangaChapter, x.MaxDateTime, x.MangaId })
+                .ToList();
+
             List<MangasDTO> mangaListDTO = new();
             foreach (var m in mangaList)
             {
-                MangaChapters? readChapter = await getLastReadChapter(m.MangaId);
                 mangaListDTO.Add(new MangasDTO
                 {
                     MangaName = m.Name,
                     ChaptersAdded = new List<string?> { m.MangaChapter },
-                    LastChapterRead = readChapter?.MangaChapter
+                    LastChapterRead = mangaListRead.FirstOrDefault(e=>e.MangaId==m.MangaId)?.MangaChapter
                 });
             }
             return mangaListDTO;
@@ -121,21 +138,6 @@ namespace MangaReaderBareBone.Controllers
             var logsAndChapters = await (from mL in _context.MangaLogs
                                          join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
                                          where mL.Status == "Read" && mL.MangaId == manga.MangaId
-                                         orderby mL.DateTime descending
-                                         select new
-                                         {
-                                             mangaLogs = mL,
-                                             mangaChapters = mC
-                                         }
-                                   ).FirstOrDefaultAsync();
-            return logsAndChapters?.mangaChapters;
-        }
-
-        private async Task<MangaChapters?> getLastReadChapter(int? mangaId)
-        {
-            var logsAndChapters = await (from mL in _context.MangaLogs
-                                         join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
-                                         where mL.Status == "Read" && mL.MangaId == mangaId
                                          orderby mL.DateTime descending
                                          select new
                                          {
