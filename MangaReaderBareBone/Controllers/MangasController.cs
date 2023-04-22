@@ -4,6 +4,7 @@ using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NaturalSort.Extension;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -148,6 +149,21 @@ namespace MangaReaderBareBone.Controllers
             return logsAndChapters?.mangaChapters;
         }
 
+        private async Task<MangaChapters?> getLastReadChapter(int mangaId)
+        {
+            var logsAndChapters = (from mL in _context.MangaLogs
+                                         join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
+                                         where mL.Status == "Read" && mL.MangaId == mangaId
+                                         orderby mL.DateTime descending
+                                         select new
+                                         {
+                                             mangaLogs = mL,
+                                             mangaChapters = mC
+                                         }
+                                   ).FirstOrDefault();
+            return logsAndChapters?.mangaChapters;
+        }
+
         //retrieving mangachapters using mangaid and chaptername
         [HttpGet("chapters")]
         public async Task<ActionResult<List<MangaChapterDTO>>> GetChapters(int? mangaId, string? mangaName, string? chapterName)
@@ -197,13 +213,24 @@ namespace MangaReaderBareBone.Controllers
             }
             else if (!string.IsNullOrEmpty(name))
             {
-                List<Manga> searchResults = await _context.Mangas.Where(e => string.Equals(e.Name, name)).ToListAsync();
-                if (searchResults == null)
-                    return NotFound();
-                foreach (Manga manga in searchResults)
+                var mangaList = await _context.Mangas
+                    .Where(m => m.Name!.ToLower().Contains(name.ToLower()))
+                    .Select(e => new { e.Name , e.MangaId})
+                    .ToListAsync();
+                var comparer = new NaturalSortComparer(StringComparison.OrdinalIgnoreCase);
+                foreach (var manga in mangaList)
                 {
-                    MangaChapters? lastRead = await getLastReadChapter(manga);
-                    searchResultsDTO.Add(manga.toDTO(lastRead));
+                    var lastRead = await getLastReadChapter(manga.MangaId);
+                    var chapters = _context.MangaChapters!.Where(e => e.MangaId == manga.MangaId).Select(f => f.MangaChapter).ToList();
+                    chapters.Sort(comparer);
+                    chapters.Reverse();
+                    searchResultsDTO.Add(new MangasDTO
+                    {
+                        MangaName = manga.Name,
+                        LastChapterRead = lastRead?.MangaChapter,
+
+                        ChaptersAdded = chapters,
+                    });
                 }
                 return searchResultsDTO;
             }

@@ -1,0 +1,39 @@
+<div class='container has-text-centered'>
+  <div class='columns is-vcentered'>
+    <div class='column'>
+      <div>
+        <h1 class="title">Manga List</h1>
+      </div>
+      <section>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>
+                Manga Name
+              </th>
+              <th>
+                Last Read Chapters
+              </th>
+              <th>
+                Latest Chapter
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let manga of allManga">
+              <td>
+                <a [routerLink]="['/Manga/',manga.mangaName]">{{manga.mangaName}} </a>
+              </td>
+              <td>
+                <a [routerLink]="['/Manga/',manga.mangaName, manga.lastChapterRead]">{{manga.lastChapterRead}} </a>
+              </td>
+              <td>
+                <a [routerLink]="['/Manga/',manga.mangaName, manga.chaptersAdded[0]]">{{manga.chaptersAdded[0]}} </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+</div>
