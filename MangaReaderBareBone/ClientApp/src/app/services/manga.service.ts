@@ -35,6 +35,12 @@ export class MangaService {
     return this.http.get('/api/Latest/mangaRead?', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)))
   }
 
+  searchKeyword(keyword: string) {
+    let params = new HttpParams();
+    params = params.append("name", keyword);
+    return this.http.get('/api/Mangas/Search?', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)))
+  }
+
     reviver(key: string, value: string | number | Date | null): any {
     let elapsed = undefined;
     if (value !== null && (key === 'dateTime')) {

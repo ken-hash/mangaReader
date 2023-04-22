@@ -43,11 +43,12 @@ namespace MangaReaderBareBone.Controllers
             List<TempManga> updatedManga = await (from m in _context.Mangas
                                                  join mL in _context.MangaLogs! on m.MangaId equals mL.MangaId
                                                  join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
-                                                 where mL.Status == status && mL.DateTime > DateTime.Now.AddDays(-(double)numDays!)
+                                                 where mL.Status == status && mL.DateTime > DateTime.Today.AddDays(-(double)numDays!)
                                                  orderby mL.DateTime descending
                                                  select new TempManga
                                                  {
                                                      Mangas = m,
+                                                     MangaLogs = mL,
                                                      MangaChapters = mC
                                                  }).ToListAsync();
             List<Manga> latestManga = new();
