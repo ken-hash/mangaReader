@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-nav-menu',
   templateUrl: './nav-menu.component.html',
   styleUrls: ['./nav-menu.component.css']
 })
-export class NavMenuComponent{
-  
-  model: any = {}
+export class NavMenuComponent {
+  constructor(private router: Router) { }
+
+  model: any = {};
   isExpanded = false;
 
   collapse() {
@@ -19,6 +21,10 @@ export class NavMenuComponent{
   }
 
   search() {
-    console.log(this.model);
+    const keyword = this.model.keyword.toLowerCase().trim();
+    if (keyword) {
+      this.router.navigate(['/Search', keyword]);
+      this.model.keyword = '';
+    }
   }
 }
