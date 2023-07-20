@@ -32,32 +32,28 @@ namespace MangaReaderBareBone.Controllers
             Manga? manga = await _context.Mangas.SingleOrDefaultAsync(m => string.Equals(m.Name, mangaName));
             if (manga != null)
             {
-                var mangaLogAndChapters = await (from mL in _context.MangaLogs
-                                                 join mC in _context.MangaChapters on mL.MangaChaptersId equals mC.MangaChaptersId
-                                                 join m in _context.Mangas on mC.MangaId equals m.MangaId
-                                                 where string.Equals(m.Name, mangaName) && mL.Status == "Added"
-                                                 orderby mL.DateTime
+                var mangaLogAndChapters = await (from mlcv in _context.MangaLogsChapterView
+                                                 where string.Equals(mlcv.Name, mangaName) && mlcv.Status == "Added"
+                                                 orderby mlcv.LogDateTime, mlcv.ChapterName
                                                  select new
                                                  {
-                                                     mangaId = m.MangaId,
-                                                     manga = m.Name,
-                                                     chapter = mC.MangaChapter,
-                                                     chapterId = mC.MangaChaptersId,
-                                                     dateTime = mL.DateTime,
+                                                     mangaId = mlcv.MangaId,
+                                                     manga = mlcv.Name,
+                                                     chapter = mlcv.ChapterName,
+                                                     chapterId = mlcv.MangaChaptersId,
+                                                     dateTime = mlcv.LogDateTime,
                                                  }
                                            ).ToListAsync();
-                var mangaLogAndChaptersRead = await (from mC in _context.MangaChapters
-                                                     join mL in _context.MangaLogs on mC.MangaChaptersId equals mL.MangaChaptersId into tempLogs
-                                                     from temp in tempLogs.DefaultIfEmpty()
-                                                     join m in _context.Mangas on mC.MangaId equals m.MangaId
-                                                     where temp.Status == "Read" && string.Equals(m.Name, mangaName)
+                var mangaLogAndChaptersRead = await (from mlcv in _context.MangaLogsChapterView
+                                                     where string.Equals(mlcv.Name, mangaName) && mlcv.Status == "Read"
+                                                     orderby mlcv.LogDateTime, mlcv.ChapterName
                                                      select new
                                                      {
-                                                         manga = m.Name,
-                                                         status = temp.Status,
-                                                         chapter = mC.MangaChapter,
-                                                         chapterId = mC.MangaChaptersId,
-                                                         dateTime = temp.DateTime,
+                                                         mangaId = mlcv.MangaId,
+                                                         manga = mlcv.Name,
+                                                         chapter = mlcv.ChapterName,
+                                                         chapterId = mlcv.MangaChaptersId,
+                                                         dateTime = mlcv.LogDateTime,
                                                      }
                                            ).ToListAsync();
                 if (sort?.ToLower() == "desc")
@@ -67,7 +63,7 @@ namespace MangaReaderBareBone.Controllers
                 {
                     mangaDetails.Add(new MangaDetailsDTO
                     {
-                        read = mangaLogAndChaptersRead.Any(e=>e.chapterId == m.chapterId),
+                        read = mangaLogAndChaptersRead.Any(e => e.chapterId == m.chapterId),
                         mangaChapter = m.chapter,
                         dateTime = m.dateTime
                     });
