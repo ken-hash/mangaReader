@@ -30,7 +30,6 @@ namespace MangaReaderBareBone.Controllers
 
         // Get latest number of numManga mangas read and chapters(max 10) in the last past numdays
         [HttpGet("mangaRead")]
-        [ResponseCache(Duration = 60 * 1)]
         public async Task<ActionResult<List<Manga>>> GetLastReadChapters(int? numDays = 7, int? numManga = 10)
         {
             if (_context.Mangas == null)
@@ -40,45 +39,43 @@ namespace MangaReaderBareBone.Controllers
 
         private async Task<List<Manga>> GetLatestManga(int? numDays = 7, int? numManga = 10, string? status = "Added", int? maxNumChapters = 10)
         {
-            List<TempManga> updatedManga = await (from m in _context.Mangas
-                                                 join mL in _context.MangaLogs! on m.MangaId equals mL.MangaId
-                                                 join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
-                                                 where mL.Status == status && mL.DateTime > DateTime.Today.AddDays(-(double)numDays!)
-                                                 orderby mL.DateTime descending
-                                                 select new TempManga
-                                                 {
-                                                     Mangas = m,
-                                                     MangaLogs = mL,
-                                                     MangaChapters = mC
-                                                 }).ToListAsync();
+            List<MangaLogsChapterView> updatedManga = await (from mlcv in _context.MangaLogsChapterView
+                                                             where mlcv.Status == status && mlcv.LogDateTime > DateTime.Today.AddDays(-(double)numDays!)
+                                                             orderby mlcv.LogDateTime descending
+                                                             select (mlcv)).ToListAsync();
             List<Manga> latestManga = new();
-            foreach (TempManga? manga in updatedManga)
+            foreach (MangaLogsChapterView manga in updatedManga)
             {
                 if (latestManga.Count >= numManga)
                     break;
-                if (!latestManga.Any(e => e.MangaId == manga?.Mangas?.MangaId))
+                if (!latestManga.Any(e => e.MangaId == manga?.MangaId))
                 {
-                    int chapterCount = manga?.Mangas?.Chapters?.Count ?? 0;
-                    if (chapterCount >= maxNumChapters)
+                    latestManga.Add(new Manga
                     {
-                        var maxChapters = manga?.Mangas?.Chapters?.Take(maxNumChapters??10).ToList();
-                        manga!.Mangas!.Chapters = maxChapters;
-                        latestManga.Add(manga!.Mangas!);
-                    }
-                    else
-                        latestManga.Add(manga!.Mangas!);
+                        MangaId = manga.MangaId,
+                        Name = manga.Name,
+                        Chapters = new List<MangaChapters> {
+                        new MangaChapters{
+                            MangaChaptersId = manga.MangaChaptersId,
+                            MangaChapter = manga.ChapterName
+                            }
+                        }
+                    });
                 }
-                if (latestManga.SingleOrDefault(e => e.MangaId == manga?.Mangas?.MangaId)?.Chapters?.Count >= numManga)
-                    continue;
+                else
+                {
+                    if (latestManga.Where(e => e.MangaId == manga?.MangaId).First().Chapters!.Count() >= maxNumChapters)
+                        break;
+                    latestManga.Where(e => e.MangaId == manga?.MangaId).First().Chapters!.Add(
+                        new MangaChapters
+                        {
+                            MangaChaptersId = manga.MangaChaptersId,
+                            MangaChapter = manga.ChapterName
+                        });
+                }
             }
             return latestManga;
         }
 
-        private class TempManga
-        {
-            public Manga? Mangas { get; set; }
-            public MangaLog? MangaLogs { get; set; }
-            public MangaChapters? MangaChapters { get; set; }
-        }
     }
 }

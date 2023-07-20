@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MangaReaderBareBone.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MangaReaderBareBone.Data
 {
@@ -9,10 +10,21 @@ namespace MangaReaderBareBone.Data
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .Entity<MangaLogsChapterView>(
+                    eb =>
+                    {
+                        eb.HasNoKey();
+                        eb.ToView("Manga_Logs_Chapter");
+                        eb.Property(v => v.MangaId);
+                    });
+        }
+
         public DbSet<MangaReaderBareBone.Models.Manga> Mangas { get; set; } = default!;
-
         public DbSet<MangaReaderBareBone.Models.MangaChapters>? MangaChapters { get; set; }
-
         public DbSet<MangaReaderBareBone.Models.MangaLog>? MangaLogs { get; set; }
+        public DbSet<MangaReaderBareBone.Models.MangaLogsChapterView>? MangaLogsChapterView { get; set; }
     }
 }
