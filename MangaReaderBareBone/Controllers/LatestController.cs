@@ -46,7 +46,7 @@ namespace MangaReaderBareBone.Controllers
             List<Manga> latestManga = new();
             foreach (MangaLogsChapterView manga in updatedManga)
             {
-                if (latestManga.Count >= numManga)
+                if (latestManga.Count() >= numManga)
                     break;
                 if (!latestManga.Any(e => e.MangaId == manga?.MangaId))
                 {
@@ -57,7 +57,8 @@ namespace MangaReaderBareBone.Controllers
                         Chapters = new List<MangaChapters> {
                         new MangaChapters{
                             MangaChaptersId = manga.MangaChaptersId,
-                            MangaChapter = manga.ChapterName
+                            MangaChapter = manga.ChapterName,
+                            MangaId = manga.MangaId
                             }
                         }
                     });
@@ -65,12 +66,13 @@ namespace MangaReaderBareBone.Controllers
                 else
                 {
                     if (latestManga.Where(e => e.MangaId == manga?.MangaId).First().Chapters!.Count() >= maxNumChapters)
-                        break;
+                        continue;
                     latestManga.Where(e => e.MangaId == manga?.MangaId).First().Chapters!.Add(
                         new MangaChapters
                         {
                             MangaChaptersId = manga.MangaChaptersId,
-                            MangaChapter = manga.ChapterName
+                            MangaChapter = manga.ChapterName,
+                            MangaId = manga.MangaId
                         });
                 }
             }
