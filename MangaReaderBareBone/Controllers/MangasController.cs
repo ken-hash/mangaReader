@@ -3,9 +3,11 @@ using MangaReaderBareBone.Data;
 using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using NaturalSort.Extension;
 using System.Text.RegularExpressions;
+using System;
 
 namespace MangaReaderBareBone.Controllers
 {
@@ -50,36 +52,35 @@ namespace MangaReaderBareBone.Controllers
 
         //retrieve mangalist with last added chapter with parameter max number of manga to retrieve
         [HttpGet("mangaList")]
-        [ResponseCache(Duration = 60 * 10)]
+        [ResponseCache(Duration = 5)]
         public async Task<ActionResult<List<MangasDTO>>> GetMangaList(int? max)
         {
             if (_context.Mangas == null || !max.HasValue || max <= 0)
                 return NotFound();
 
-            var mangaListRead = await (from mlcv in _context.MangaLogsChapterView
-                                       where mlcv.Status == "Read"
-                                       orderby mlcv.LogDateTime descending
-                                       select (mlcv)).ToListAsync();
-
-            var mangaListAdded = await (from mlcv in _context.MangaLogsChapterView
-                                        where mlcv.Status == "Added"
-                                        orderby mlcv.LogDateTime descending
-                                        select (mlcv)).ToListAsync();
+            var mangaList = await (from mlcv in _context.MangaLogsChapterView
+                                   select (mlcv)).ToListAsync();
 
             List<MangasDTO> mangaListDTO = new();
-            foreach (var m in mangaListAdded)
+            var mangaListDict = mangaList.GroupBy(m => m.Name!).ToDictionary(k => k.Key, v => v.ToList());
+
+            foreach (var manga in mangaListDict)
             {
-                if (!mangaListDTO.Any(e => e.MangaName == m.Name))
+                if (!mangaListDTO.Any(e => e.MangaName == manga.Key))
                 {
+                    mangaListDict.TryGetValue(manga.Key, out var mangaLogView);
+                    var innerList = mangaLogView!.GroupBy(e => e.Status!).ToDictionary(k => k.Key, v => v.ToList());
+                    innerList!.TryGetValue("Added", out var mangaLogAdded);
+                    innerList!.TryGetValue("Read", out var mangaLogRead);
                     mangaListDTO.Add(new MangasDTO
                     {
-                        MangaName = m.Name,
-                        ChaptersAdded = new List<string?> { m.ChapterName },
-                        LastChapterRead = mangaListRead.FirstOrDefault(e => e.Name == m.Name)?.ChapterName
+                        MangaName = manga.Key,
+                        ChaptersAdded = new List<string?> { mangaLogAdded!.OrderByDescending(e => e.LogDateTime).First().ChapterName },
+                        LastChapterRead = mangaLogRead?.OrderByDescending(e => e.LogDateTime).First()?.ChapterName
                     });
                 }
             }
-            return mangaListDTO;
+            return mangaListDTO.OrderBy(e => e.MangaName).ToList();
         }
 
         //retrieve manga chapter details using mangaid
@@ -124,20 +125,6 @@ namespace MangaReaderBareBone.Controllers
             return logsAndChapters?.mangaChapters;
         }
 
-        private async Task<MangaChapters?> getLastReadChapter(int mangaId)
-        {
-            var logsAndChapters = await (from mL in _context.MangaLogs
-                                         join mC in _context.MangaChapters! on mL.MangaChaptersId equals mC.MangaChaptersId
-                                         where mL.Status == "Read" && mL.MangaId == mangaId
-                                         orderby mL.DateTime descending
-                                         select new
-                                         {
-                                             mangaLogs = mL,
-                                             mangaChapters = mC
-                                         }
-                                   ).FirstOrDefaultAsync();
-            return logsAndChapters?.mangaChapters;
-        }
 
         //retrieving mangachapters using mangaid and chaptername
         [HttpGet("chapters")]
@@ -176,44 +163,33 @@ namespace MangaReaderBareBone.Controllers
         {
             if (_context.Mangas == null || (!id.HasValue && string.IsNullOrEmpty(name)))
                 return NotFound();
-            List<MangasDTO> searchResultsDTO = new();
-            if (id.HasValue)
-            {
-                Manga? manga = await _context.Mangas.FindAsync(id);
-                if (manga == null)
-                    return NotFound();
-                manga.Chapters = await GetMangaChapters(manga!.MangaId) ?? new List<MangaChapters>();
-                MangaChapters? lastRead = await getLastReadChapter(manga);
-                searchResultsDTO.Add(manga.toDTO(lastRead));
-                return searchResultsDTO;
-            }
-            else if (!string.IsNullOrEmpty(name))
-            {
-                var clean = name.Trim().ToLower().Replace(" ", "-");
-                var mangaList = await _context.Mangas
-                    .Where(m => m.Name!.ToLower().Contains(clean))
-                    .Select(e => new { e.Name, e.MangaId })
-                    .ToListAsync();
-                var comparer = new NaturalSortComparer(StringComparison.OrdinalIgnoreCase);
-                foreach (var manga in mangaList)
-                {
-                    var lastRead = await getLastReadChapter(manga.MangaId);
-                    var chapters = await _context.MangaChapters!.Where(e => e.MangaId == manga.MangaId).Select(f => f.MangaChapter).ToListAsync();
-                    var filteredchapters = chapters.Where(c => new Regex(@"^\d+").IsMatch(c!)).ToList();
-                    filteredchapters.Sort(comparer);
-                    filteredchapters.Reverse();
-                    searchResultsDTO.Add(new MangasDTO
-                    {
-                        MangaName = manga.Name,
-                        LastChapterRead = lastRead?.MangaChapter,
+            var clean = name.Trim().ToLower().Replace(" ", "-");
+            var mangaList = await (from mlcv in _context.MangaLogsChapterView
+                                   where mlcv.MangaId == id || mlcv.Name!.Contains(clean)
+                                   select (mlcv)).ToListAsync();
+            if (mangaList.Count == 0)
+                return NotFound();
+            List<MangasDTO> mangaListDTO = new();
+            var mangaListDict = mangaList.GroupBy(m => m.Name!).ToDictionary(k => k.Key, v => v.ToList());
 
-                        ChaptersAdded = filteredchapters,
+
+            foreach (var manga in mangaListDict)
+            {
+                if (!mangaListDTO.Any(e => e.MangaName == manga.Key))
+                {
+                    mangaListDict.TryGetValue(manga.Key, out var mangaLogView);
+                    var innerList = mangaLogView!.GroupBy(e => e.Status!).ToDictionary(k => k.Key, v => v.ToList());
+                    innerList!.TryGetValue("Added", out var mangaLogAdded);
+                    innerList!.TryGetValue("Read", out var mangaLogRead);
+                    mangaListDTO.Add(new MangasDTO
+                    {
+                        MangaName = manga.Key,
+                        ChaptersAdded = new List<string?> { mangaLogAdded!.OrderByDescending(e => e.LogDateTime).First().ChapterName },
+                        LastChapterRead = mangaLogRead?.OrderByDescending(e => e.LogDateTime).First()?.ChapterName
                     });
                 }
-                return searchResultsDTO;
             }
-            else
-                return NotFound();
+            return mangaListDTO.OrderBy(e => e.MangaName).ToList();
         }
     }
 }

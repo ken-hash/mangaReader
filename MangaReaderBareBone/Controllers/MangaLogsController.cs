@@ -22,7 +22,7 @@ namespace MangaReaderBareBone.Controllers
 
         //Retrieving all logs for manga using manga name with sort as second parameter
         [HttpGet("mangaName")]
-        [ResponseCache(Duration = 60 * 2, VaryByQueryKeys = new[] { "mangaName" })]
+        [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "mangaName" })]
         public async Task<ActionResult<List<MangaDetailsDTO>>> GetMangaLogByMangaNameAsync(string? mangaName, string? sort = "asc")
         {
             if (_context.MangaLogs == null || string.IsNullOrEmpty(mangaName) || _context.MangaChapters == null || _context.Mangas == null)
@@ -33,8 +33,7 @@ namespace MangaReaderBareBone.Controllers
             if (manga != null)
             {
                 var mangaLogAndChapters = await (from mlcv in _context.MangaLogsChapterView
-                                                 where string.Equals(mlcv.Name, mangaName) && mlcv.Status == "Added"
-                                                 orderby mlcv.LogDateTime, mlcv.ChapterName
+                                                 where string.Equals(mlcv.Name, mangaName) 
                                                  select new
                                                  {
                                                      mangaId = mlcv.MangaId,
@@ -42,33 +41,27 @@ namespace MangaReaderBareBone.Controllers
                                                      chapter = mlcv.ChapterName,
                                                      chapterId = mlcv.MangaChaptersId,
                                                      dateTime = mlcv.LogDateTime,
+                                                     status = mlcv.Status,
                                                  }
                                            ).ToListAsync();
-                var mangaLogAndChaptersRead = await (from mlcv in _context.MangaLogsChapterView
-                                                     where string.Equals(mlcv.Name, mangaName) && mlcv.Status == "Read"
-                                                     orderby mlcv.LogDateTime, mlcv.ChapterName
-                                                     select new
-                                                     {
-                                                         mangaId = mlcv.MangaId,
-                                                         manga = mlcv.Name,
-                                                         chapter = mlcv.ChapterName,
-                                                         chapterId = mlcv.MangaChaptersId,
-                                                         dateTime = mlcv.LogDateTime,
-                                                     }
-                                           ).ToListAsync();
-                if (sort?.ToLower() == "desc")
-                    mangaLogAndChapters.Reverse();
+                
                 List<MangaDetailsDTO> mangaDetails = new();
-                foreach (var m in mangaLogAndChapters)
+                var mangaListDictionary = mangaLogAndChapters.GroupBy(m=>m.status).ToDictionary(k=>k.Key, m => m.ToDictionary(k1=>k1.chapter, v =>v.dateTime));
+                mangaListDictionary.TryGetValue("Added", out var mangaAdded);
+                foreach (var chapter in mangaAdded!)
                 {
+                    mangaListDictionary.TryGetValue("Read", out var mangaRead);
                     mangaDetails.Add(new MangaDetailsDTO
                     {
-                        read = mangaLogAndChaptersRead.Any(e => e.chapterId == m.chapterId),
-                        mangaChapter = m.chapter,
-                        dateTime = m.dateTime
+                        read = mangaRead?.ContainsKey(chapter.Key),
+                        mangaChapter = chapter.Key,
+                        dateTime = mangaListDictionary["Added"][chapter.Key]
                     });
                 }
-                return mangaDetails;
+                var results = mangaDetails.OrderBy(e => e.dateTime).ToList();
+                if (sort != "asc")
+                    results.Reverse();
+                return results;
             }
             return NotFound();
         }
