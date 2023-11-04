@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ChapterService } from '../../services/chapter.service';
 import { ChapterDetails } from '../../commons/models/chapterdetails.model';
 import { Title } from "@angular/platform-browser";
@@ -9,52 +9,84 @@ import { Title } from "@angular/platform-browser";
   templateUrl: './manga-read.component.html',
   styleUrls: ['./manga-read.component.css']
 })
-export class MangaReadComponent implements OnInit {
+export class MangaReadComponent implements OnInit, AfterViewInit {
   manga: string | undefined;
   chapterName: string | undefined;
   chapterDetails: ChapterDetails | undefined;
   allChapters: any;
-  loading: boolean = true
+  loading: boolean = true;
 
-  constructor(private activatedRoute: ActivatedRoute,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private chapterService: ChapterService,
     private router: Router,
-    private titleService: Title  ) {
-  }
+    private titleService: Title
+  ) { }
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => {
       this.manga = params['mangaName'];
       this.chapterName = params['chapterName'];
-      this.chapterService.postReadChapter(this.manga!, this.chapterName!).subscribe(data => {
-      }, err => {
-        if (err.status == 404)
-          this.router.navigate(['/404']);
-      });
-      this.titleService.setTitle(`${this.manga?.toUpperCase().replaceAll("-", " ")} ${this.chapterName}`);
-      this.chapterService.getChapter(this.manga!, this.chapterName!).subscribe(chapter => {this.chapterDetails = chapter}, err => {
-        if (err.status == 404)
-          this.router.navigate(['/404']);
-      });
-      this.chapterService.getChapterList(this.manga!).subscribe(chapterList => this.allChapters = chapterList);
+      this.postReadChapter();
+      this.setPageTitle();
+      this.getChapterDetails();
+      this.getChapterList();
     });
   }
 
+  ngAfterViewInit(): void {
+    this.scrollIntoView();
+  }
 
-  ngAfterViewInit() {
+  onChangeObj(chapter: any) {
+    this.router.navigate(['Manga', this.manga, chapter]);
+  }
+
+  onLoad() {
+    this.loading = false;
+  }
+
+  private postReadChapter(): void {
+    this.chapterService.postReadChapter(this.manga!, this.chapterName!).subscribe(
+      () => { },
+      (err: { status: number }) => {
+        if (err.status == 404) {
+          this.router.navigate(['/404']);
+        }
+      }
+    );
+  }
+
+  private setPageTitle(): void {
+    this.titleService.setTitle(`${this.manga?.toUpperCase().replaceAll("-", " ")} ${this.chapterName}`);
+  }
+
+  private getChapterDetails(): void {
+    this.chapterService.getChapter(this.manga!, this.chapterName!).subscribe(
+      (chapter: ChapterDetails) => {
+        this.chapterDetails = chapter;
+      },
+      (err: { status: number }) => {
+        if (err.status == 404) {
+          this.router.navigate(['/404']);
+        }
+      }
+    );
+  }
+
+  private getChapterList(): void {
+    this.chapterService.getChapterList(this.manga!).subscribe(
+      (chapterList) => {
+        this.allChapters = chapterList;
+      }
+    );
+  }
+
+  private scrollIntoView(): void {
     let top = document.getElementById('top');
     if (top !== null) {
       top.scrollIntoView();
       top = null;
     }
   }
-
-  onChangeObj(chapter: any) {
-    this.router.navigate(['Manga',this.manga, chapter]);
-  }
-
-  onLoad() {
-    this.loading = false;
-  }
 }
-

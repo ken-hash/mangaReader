@@ -9,56 +9,67 @@ export class MangaService {
 
   constructor(private http: HttpClient) { }
 
+  private createHttpParams(params: any = {}): HttpParams {
+    let httpParams = new HttpParams();
+    for (const key in params) {
+      if (params[key] !== undefined) {
+        httpParams = httpParams.append(key, params[key].toString());
+      }
+    }
+    return httpParams;
+  }
+
+  private getWithParams(endpoint: string, params: any = {}): any {
+    return this.http.get(endpoint, {
+      responseType: 'text',
+      params: this.createHttpParams(params),
+    }).pipe(map(res => JSON.parse(res, this.reviver)));
+  }
+
   getMangaDetails(mangaName: string) {
-    let params = new HttpParams();
-    params = params.append("mangaName", mangaName);
-    return this.http.get('/api/MangaLogs/mangaName/', { responseType: 'text', params: params, }).pipe(map(res => JSON.parse(res, this.reviver)))
+    return this.getWithParams('/api/MangaLogs/mangaName', { mangaName });
   }
 
   getMangaList(max: number = 20) {
-    let params = new HttpParams();
-    params = params.append("max", max);
-    return this.http.get('/api/Mangas/mangaList/', { responseType: 'text', params: params, }).pipe(map(res => JSON.parse(res)))
+    return this.getWithParams('/api/Mangas/mangaList', { max });
   }
 
   getLatestChapters(numDays: number = 7, numManga: number = 20) {
-    let params = new HttpParams();
-    params = params.append("numDays", numDays);
-    params = params.append("numManga", numManga);
-    return this.http.get('/api/Latest/manga?', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)))
+    return this.getWithParams('/api/Latest/manga', { numDays, numManga });
   }
 
   getLastReadMangas(numDays: number = 7, numManga: number = 20) {
-    let params = new HttpParams();
-    params = params.append("numDays", numDays);
-    params = params.append("numManga", numManga);
-    return this.http.get('/api/Latest/mangaRead?', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)))
+    return this.getWithParams('/api/Latest/mangaRead', { numDays, numManga });
   }
 
   searchKeyword(keyword: string) {
-    let params = new HttpParams();
-    params = params.append("name", keyword);
-    return this.http.get('/api/Mangas/Search?', { responseType: 'text', params: params }).pipe(map(res => JSON.parse(res)))
+    return this.getWithParams('/api/Mangas/Search', { name: keyword });
   }
 
-    reviver(key: string, value: string | number | Date | null): any {
-    let elapsed = undefined;
-    if (value !== null && (key === 'dateTime')) {
-      elapsed = new Date().getTime() - new Date(value).getTime();
-      if (Math.trunc(elapsed / (1000 * 60 * 60 * 24 * 7 * 4)) > 0) {
-        return (elapsed / (1000 * 60 * 60 * 24 * 7* 4)).toFixed(0) + " months ago";
-      }
-      if (Math.trunc(elapsed / (1000 * 60 * 60 * 24)) > 7) {
-        return (elapsed / (1000 * 60 * 60 * 24 * 7)).toFixed(0) + " weeks ago";
-      }
-      else if (Math.trunc(elapsed/(1000 * 60 * 60 * 24)) > 0) {
-        return (elapsed / (1000 * 60 * 60 * 24)).toFixed(0) + " days ago";
-      }
-      else {
-        return (elapsed / (1000 * 60 * 60)).toFixed(1) + " hours ago";
+  reviver(key: string, value: string | number | Date | null): any {
+    if (value !== null && key === 'dateTime') {
+      const elapsed = new Date().getTime() - new Date(value).getTime();
+      const seconds = Math.trunc(elapsed / 1000);
+      const minutes = Math.trunc(seconds / 60);
+      const hours = Math.trunc(minutes / 60);
+      const days = Math.trunc(hours / 24);
+      const weeks = Math.trunc(days / 7);
+      const months = Math.trunc(weeks / 4);
+
+      if (months > 0) {
+        return `${months} months ago`;
+      } else if (weeks > 0) {
+        return `${weeks} weeks ago`;
+      } else if (days > 0) {
+        return `${days} days ago`;
+      } else if (hours > 0) {
+        const remainingMinutes = minutes % 60;
+        return `${hours} hours and ${remainingMinutes} minutes ago`;
+      } else {
+        const remainingSeconds = seconds % 60;
+        return `${minutes} minutes and ${remainingSeconds} seconds ago`;
       }
     }
     return value;
   }
-
 }
