@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { MangaLatest } from '../commons/models/mangaLatest.model';
 import { MangaService } from '../services/manga.service';
-
 
 @Component({
   selector: 'app-home',
@@ -9,13 +9,25 @@ import { MangaService } from '../services/manga.service';
 
 export class HomeComponent implements OnInit {
   title = 'Manga Reader';
-  latestManga: any;
-  readManga: any;
+  latestManga: MangaLatest[] | undefined;
+  readManga: MangaLatest[] | undefined;
 
-  constructor(private mangaService: MangaService) {
-  }
+  constructor(private mangaService: MangaService) { }
+
   ngOnInit() {
-    this.mangaService.getLatestChapters().subscribe(latestChapters => this.latestManga = latestChapters);
-    this.mangaService.getLastReadMangas().subscribe(lastReadChapters => this.readManga = lastReadChapters);
+    this.fetchLatestChapters();
+    this.fetchLastReadMangas();
+  }
+
+  private fetchLatestChapters() {
+    this.mangaService.getLatestChapters(5).subscribe(
+      (latestChapters: MangaLatest[]) => (this.latestManga = latestChapters)
+    );
+  }
+
+  private fetchLastReadMangas() {
+    this.mangaService.getLastReadMangas(5).subscribe(
+      (lastReadChapters: MangaLatest[]) => (this.readManga = lastReadChapters)
+    );
   }
 }
