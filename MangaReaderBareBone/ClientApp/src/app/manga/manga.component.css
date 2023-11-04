@@ -1,14 +1,35 @@
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+}
+
+th, td {
+  vertical-align: middle;
+  text-align: center !important;
+  font-size: 14px;
+}
+
+th {
+  font-size: 17px;
+}
+
 h1 {
   color: white !important;
+  font-size: 19px;
   margin-bottom: 20px;
 }
 
-td {
-  vertical-align: middle;
-  text-align: center !important;
+@media screen and (min-width: 769px) {
+  .container {
+    max-width: 100%;
+  }
 }
-
-.table th {
-  font-size: 17px;
-  text-align: center
+@media screen and (min-width: 769px) {
+  th, td {
+    font-size: 15px;
+  }
 }
