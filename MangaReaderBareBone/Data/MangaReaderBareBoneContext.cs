@@ -17,7 +17,7 @@ namespace MangaReaderBareBone.Data
                     eb =>
                     {
                         eb.HasNoKey();
-                        eb.ToView("Manga_Logs_Chapter");
+                        eb.ToView("vw_Manga_Logs_Chapter");
                         eb.Property(v => v.MangaId);
                     });
         }

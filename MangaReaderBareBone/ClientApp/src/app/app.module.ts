@@ -1,8 +1,8 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -12,9 +12,18 @@ import { MangaReadComponent } from './manga/manga-read/manga-read.component';
 import { MangaSearchComponent } from './manga/manga-search/manga-search.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-
 import { ChapterService } from './services/chapter.service';
 import { MangaService } from './services/manga.service';
+
+const appRoutes: Routes = [
+  { path: '', component: HomeComponent, pathMatch: 'full' },
+  { path: 'Manga', component: MangaComponent },
+  { path: 'Manga/:mangaName', component: MangaDetailComponent },
+  { path: 'Manga/:mangaName/:chapterName', component: MangaReadComponent },
+  { path: 'Search/:keyword', component: MangaSearchComponent },
+  { path: '404', component: PageNotFoundComponent },
+  { path: '**', redirectTo: '404' },
+];
 
 @NgModule({
   declarations: [
@@ -31,20 +40,9 @@ import { MangaService } from './services/manga.service';
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     FormsModule,
-    RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'Manga', component: MangaComponent },
-      { path: 'Manga/:mangaName', component: MangaDetailComponent },
-      { path: 'Manga/:mangaName/:chapterName', component: MangaReadComponent },
-      { path: 'Search/:keyword', component: MangaSearchComponent },
-      { path: '404', component: PageNotFoundComponent },
-      { path: '**', redirectTo: '404' }
-    ], { scrollPositionRestoration: 'enabled' })
+    RouterModule.forRoot(appRoutes, { scrollPositionRestoration: 'enabled' })
   ],
-  providers: [
-    ChapterService,
-    MangaService
-  ],
+  providers: [ChapterService, MangaService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
