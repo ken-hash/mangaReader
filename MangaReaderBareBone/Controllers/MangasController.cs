@@ -59,7 +59,12 @@ namespace MangaReaderBareBone.Controllers
         [ResponseCache(Duration = 5)]
         public async Task<ActionResult<List<MangasDTO>>> GetMangaList(int? max)
         {
-            var connectionString = "REDACTED_CONNECTION_STRING";
+            IConfiguration configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+            var connectionString = configuration.GetConnectionString("MangaReaderBareBoneContext");
             using (IDbConnection dbConnection = new SqlConnection(connectionString))
             {
                 var storedProcedure = "sp_getAllLatestManga";
