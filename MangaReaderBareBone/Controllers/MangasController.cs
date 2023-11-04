@@ -59,7 +59,12 @@ namespace MangaReaderBareBone.Controllers
         [ResponseCache(Duration = 5)]
         public async Task<ActionResult<List<MangasDTO>>> GetMangaList(int? max)
         {
-            var connectionString = "Data Source=192.168.50.11,1433;User ID=KenDev;Password='kiss3825!';Initial Catalog = UbuntuServer;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Persist Security Info=True;MultipleActiveResultSets=true";
+            IConfiguration configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+            var connectionString = configuration.GetConnectionString("MangaReaderBareBoneContext");
             using (IDbConnection dbConnection = new SqlConnection(connectionString))
             {
                 var storedProcedure = "sp_getAllLatestManga";
