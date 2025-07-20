@@ -1,4 +1,4 @@
-a.navbar-brand {
+.navbar-brand {
   white-space: normal;
   text-align: initial;
   word-break: break-all;
@@ -9,6 +9,7 @@ a.navbar-brand {
 .navbar {
   padding-top: 0rem !important;
   padding-bottom: 0rem !important;
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
 
 html {
@@ -23,4 +24,10 @@ html {
 
 .box-shadow {
   box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+@media (min-width: 768px) {
+  .navbar-content {
+    min-height: calc(100vh - 6.5rem);
+  }
 }

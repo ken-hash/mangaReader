@@ -38,8 +38,8 @@ export class MangaReadComponent implements OnInit, AfterViewInit {
     this.scrollIntoView();
   }
 
-  onChangeObj(chapter: any) {
-    this.router.navigate(['Manga', this.manga, chapter]);
+  onChangeObj(chapter: string) {
+    this.router.navigate(['/Manga', this.manga, chapter]);
   }
 
   onLoad() {
@@ -89,4 +89,9 @@ export class MangaReadComponent implements OnInit, AfterViewInit {
       top = null;
     }
   }
+
+  getTrimmedChapterName(chapterName: string): string {
+    return chapterName.length > 15 ? chapterName.slice(0, 15) + '...' : chapterName;
+  }
+
 }
