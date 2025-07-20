@@ -14,7 +14,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "AllowCORS", builder =>
     {
-        builder.AllowAnyOrigin()
+        builder.WithOrigins(
+            "http://localhost:5000",
+            "http://localhost:5001")
                .AllowAnyMethod()
                .AllowAnyHeader();
     });
@@ -28,19 +30,14 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseStaticFiles(new StaticFileOptions()
 {
-#if RELEASE
     FileProvider = new PhysicalFileProvider(
-    Path.Combine("/", "mnt", "MangaPi"
+    Path.Combine("\\\\192.168.50.11", "Public-Manga"
     ))
-#else
-    FileProvider = new PhysicalFileProvider(
-    Path.Combine("\\\\192.168.50.11\\Public-Manga"
-    ))
-#endif
+    //EnableDirectoryBrowsing = true
 });
 
 app.UseCors("AllowCORS");
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 builder.Services.AddResponseCaching();
 app.UseResponseCaching();
 app.UseRouting();

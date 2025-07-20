@@ -22,7 +22,7 @@
               [routerLinkActiveOptions]="{ exact: true }">
             <a class="nav-link active" [routerLink]="['/Manga']">MangaList</a>
         </ul>
-        <form class="d-flex" #searchForm="ngForm" (ngSubmit)="search()" autocomplete="off">
+        <form class="d-flex me-3" #searchForm="ngForm" (ngSubmit)="search()" autocomplete="off">
           <input class="form-control me-2" type="search" name="search" [(ngModel)]="model.keyword" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
