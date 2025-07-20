@@ -11,6 +11,7 @@ import { MangaService } from '../../services/manga.service';
 })
 export class MangaDetailComponent implements OnInit {
   manga: string | undefined;
+  order: string | undefined;
   allChapters: MangaDetail[] | undefined;
 
   constructor(private activatedRoute: ActivatedRoute,
@@ -19,9 +20,13 @@ export class MangaDetailComponent implements OnInit {
     private titleService: Title) { }
 
   ngOnInit(): void {
+    this.activatedRoute.queryParams.subscribe(params => {
+      this.order = params['sort'] ?? 'asc';
+    });
+
     this.activatedRoute.params.subscribe(params => {
       this.manga = params['mangaName'];
-      this.mangaservice.getMangaDetails(this.manga!).subscribe((detail: MangaDetail[])  => { this.allChapters = detail }, (err: { status: number; }) => {
+      this.mangaservice.getMangaDetails(this.manga!, this.order!).subscribe((detail: MangaDetail[]) => { this.allChapters = detail }, (err: { status: number; }) => {
         if (err.status == 404)
           this.router.navigate(['/404']);
       });
