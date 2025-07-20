@@ -26,8 +26,8 @@ export class MangaService {
     }).pipe(map(res => JSON.parse(res, this.reviver)));
   }
 
-  getMangaDetails(mangaName: string) {
-    return this.getWithParams('/api/MangaLogs/mangaName', { mangaName });
+  getMangaDetails(mangaName: string, sort: string) {
+    return this.getWithParams('/api/MangaLogs/mangaName', { mangaName , sort });
   }
 
   getMangaList(max: number = 20) {

@@ -1,12 +1,14 @@
 <div class='container has-text-centered'>
   <div class='column'>
-    <h1 class="title"><a [routerLink]="['/Manga/',manga]">{{manga!.toUpperCase().replaceAll('-',' ')}}</a> - {{chapterName}}</h1>
+    <h1 class="title"><a [routerLink]="['/Manga/',manga]" [queryParams]="{sort: 'desc'}">{{manga!.toUpperCase().replaceAll('-',' ')}}</a> - {{chapterName}}</h1>
   </div>
 </div>
 <div class="container-fluid">
-  <select class="form-group col-md-auto" #chapter (change)="onChangeObj(chapter.value)" name="myDropdown">
+  <select class="form-group col-md-auto" #chapterSelect (change)="onChangeObj(chapterSelect.value)" name="mangaDropDown">
     <option disabled selected>Chapter: {{chapterName}}</option>
-    <option *ngFor="let chapter of allChapters" value="{{chapter.mangaChapter}}">Chapter: {{chapter.mangaChapter}}  </option>
+    <option *ngFor="let chapter of allChapters" [value]="chapter.mangaChapter">
+      Chapter: {{ getTrimmedChapterName(chapter.mangaChapter) }}
+    </option>
   </select>
   <div class="d-inline-flex float-end">
     <button class="button is-dark is-rounded" [disabled]="chapterDetails!.previousChapter == null" [routerLink]="['/Manga/',manga, chapterDetails!.previousChapter]"> < Previous </button>

@@ -39,6 +39,6 @@ export class MangaSearchComponent implements OnInit {
   }
 
   private setTitle(keyword: string) {
-    this.titleService.setTitle(keyword);
+    this.titleService.setTitle(`${keyword.toUpperCase()} Results`);
   }
 }

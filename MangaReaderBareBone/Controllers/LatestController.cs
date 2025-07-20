@@ -40,9 +40,9 @@ namespace MangaReaderBareBone.Controllers
         private async Task<List<Manga>> GetLatestManga(int? numDays = 7, int? numManga = 10, string? status = "Added", int? maxNumChapters = 10)
         {
             List<MangaLogsChapterView> updatedManga = await (from mlcv in _context.MangaLogsChapterView
-                                                             where mlcv.Status == status && mlcv.LogDateTime > DateTime.Today.AddDays(-(double)numDays!)
-                                                             orderby mlcv.LogDateTime descending
-                                                             select (mlcv)).ToListAsync();
+                                                 where mlcv.Status == status && mlcv.LogDateTime > DateTime.Today.AddDays(-(double)numDays!)
+                                                 orderby mlcv.LogDateTime descending 
+                                                 select(mlcv)).ToListAsync();
             List<Manga> latestManga = new();
             foreach (MangaLogsChapterView manga in updatedManga)
             {
@@ -68,8 +68,7 @@ namespace MangaReaderBareBone.Controllers
                     if (latestManga.Where(e => e.MangaId == manga?.MangaId).First().Chapters!.Count() >= maxNumChapters)
                         continue;
                     latestManga.Where(e => e.MangaId == manga?.MangaId).First().Chapters!.Add(
-                        new MangaChapters
-                        {
+                        new MangaChapters {
                             MangaChaptersId = manga.MangaChaptersId,
                             MangaChapter = manga.ChapterName,
                             MangaId = manga.MangaId

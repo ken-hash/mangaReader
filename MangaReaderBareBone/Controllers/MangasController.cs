@@ -3,12 +3,7 @@ using MangaReaderBareBone.Data;
 using MangaReaderBareBone.DTO;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using NaturalSort.Extension;
-using System.Text.RegularExpressions;
-using System;
-using System.Diagnostics;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using Dapper;
@@ -65,6 +60,7 @@ namespace MangaReaderBareBone.Controllers
             .Build();
 
             var connectionString = configuration.GetConnectionString("MangaReaderBareBoneContext");
+
             using (IDbConnection dbConnection = new SqlConnection(connectionString))
             {
                 var storedProcedure = "sp_getAllLatestManga";

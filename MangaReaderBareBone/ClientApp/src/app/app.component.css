@@ -4,15 +4,17 @@ body,
 #background {
   width: 100vw;
   min-height: 100vh;
-  background-color: #212529;
+  background-color: #1f2424;
 }
 
 .border-top {
   border-top: 2px solid #e5e5e5;
+  background-color: #1f2424 !important;
 }
 
 .border-bottom {
   border-bottom: 2px solid #e5e5e5;
+  background-color: #1f2424 !important;
 }
 
 h2, h3 {

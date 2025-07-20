@@ -1,16 +1,22 @@
   <div class="row">
     <div class="container-responsive">
-      <h3>Latest Chapters</h3>
+      <h3>Latest Chapters as of {{updates??"xxx"}}</h3>
       <ul>
-        <li *ngFor='let manga of latestManga'><a [routerLink]="['/Manga/',manga.name]">{{manga.name}} </a>- <span *ngFor="let chapter of manga.chapters">
-          <a [routerLink]="['/Manga/',manga.name, chapter.mangaChapter]">{{chapter.mangaChapter}} </a> </span></li>
+        <li *ngFor='let manga of latestManga'>
+          <a [routerLink]="['/Manga/',manga.name]" [queryParams]="{sort: 'desc'}">{{manga.name}} </a>- <span *ngFor="let chapter of manga.chapters">
+            <a [routerLink]="['/Manga/',manga.name, chapter.mangaChapter]">{{chapter.mangaChapter}} </a>
+          </span>
+        </li>
       </ul>
     </div>
     <div class=" container-responsive">
       <h3>Last Read Chapters</h3>
       <ul>
-        <li *ngFor='let manga of readManga'><a [routerLink]="['/Manga/',manga.name]">{{manga.name}} </a>- <span *ngFor="let chapter of manga.chapters">
-          <a [routerLink]="['/Manga/',manga.name, chapter.mangaChapter]" style="text-decoration: none">{{chapter.mangaChapter}} </a> </span></li>
+        <li *ngFor='let manga of readManga'>
+          <a [routerLink]="['/Manga/',manga.name]" [queryParams]="{sort: 'desc'}">{{manga.name}} </a>- <span *ngFor="let chapter of manga.chapters">
+            <a [routerLink]="['/Manga/',manga.name, chapter.mangaChapter]" style="text-decoration: none">{{chapter.mangaChapter}} </a>
+          </span>
+        </li>
       </ul>
     </div>
   </div>
