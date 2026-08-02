@@ -1,9 +1,11 @@
 ﻿using MangaReaderBareBone.Controllers.Extensions;
 using MangaReaderBareBone.Data;
 using MangaReaderBareBone.DTO;
+using MangaReaderBareBone.Helpers;
 using MangaReaderBareBone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using Dapper;
@@ -18,10 +20,12 @@ namespace MangaReaderBareBone.Controllers
     public class MangasController : ControllerBase
     {
         private readonly MangaReaderBareBoneContext _context;
+        private readonly IMemoryCache _memoryCache;
 
-        public MangasController(MangaReaderBareBoneContext context)
+        public MangasController(MangaReaderBareBoneContext context, IMemoryCache memoryCache)
         {
             _context = context;
+            _memoryCache = memoryCache;
         }
 
         //retrieving manga details in the database using manga id or manga name
@@ -199,6 +203,71 @@ namespace MangaReaderBareBone.Controllers
                 }
             }
             return mangaListDTO.OrderBy(e => e.MangaName).ToList();
+        }
+
+        [HttpGet("autocomplete")]
+        public async Task<ActionResult<List<MangasDTO>>> Autocomplete(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<MangasDTO>();
+
+            if (!_memoryCache.TryGetValue("AllMangaSummaries", out List<MangasDTO>? allMangas))
+            {
+                IConfiguration configuration = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .Build();
+
+                var connectionString = configuration.GetConnectionString("MangaReaderBareBoneContext");
+
+                using (IDbConnection dbConnection = new SqlConnection(connectionString))
+                {
+                    var storedProcedure = "sp_getAllLatestManga";
+                    IEnumerable<MangaLogsChapterView> res = await dbConnection.QueryAsync<MangaLogsChapterView>(storedProcedure, commandType: CommandType.StoredProcedure);
+
+                    if (res.Any())
+                    {
+                        var mangaListDict = res.GroupBy(m => m.Name!).ToDictionary(k => k.Key, v => v.ToList());
+                        allMangas = new List<MangasDTO>();
+                        foreach (var manga in mangaListDict)
+                        {
+                            mangaListDict.TryGetValue(manga.Key, out var mangaLogView);
+                            var innerList = mangaLogView!.GroupBy(e => e.Status!).ToDictionary(k => k.Key, v => v.ToList());
+                            innerList.TryGetValue("Added", out var mangaLogAdded);
+                            innerList.TryGetValue("Read", out var mangaLogRead);
+                            allMangas.Add(new MangasDTO
+                            {
+                                MangaName = manga.Key,
+                                ChaptersAdded = new List<string?> { mangaLogAdded!.OrderByDescending(e => e.LogDateTime).First().ChapterName },
+                                LastChapterRead = mangaLogRead?.OrderByDescending(e => e.LogDateTime).First()?.ChapterName
+                            });
+                        }
+                    }
+                    else
+                    {
+                        allMangas = new List<MangasDTO>();
+                    }
+                }
+
+                _memoryCache.Set("AllMangaSummaries", allMangas, TimeSpan.FromMinutes(10));
+            }
+
+            if (allMangas == null || !allMangas.Any())
+                return new List<MangasDTO>();
+
+            var results = allMangas
+                .Select(m => new
+                {
+                    Manga = m,
+                    Score = FuzzySearch.CalculateSimilarity(m.MangaName ?? "", query)
+                })
+                .Where(x => x.Score > 0.4 || (x.Manga.MangaName != null && x.Manga.MangaName.Contains(query, StringComparison.OrdinalIgnoreCase)))
+                .OrderByDescending(x => x.Score)
+                .Take(10)
+                .Select(x => x.Manga)
+                .ToList();
+
+            return results;
         }
     }
 }
